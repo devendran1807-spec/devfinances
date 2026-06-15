@@ -244,6 +244,16 @@
       <div class="field"><label>Moomoo Cash (MYR)</label><input type="number" id="setup-cash" placeholder="e.g. 4069" inputmode="decimal"/></div>
     </div>
 
+    <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin:0 0 12px">Properties</div>
+    <div class="card" style="margin-bottom:20px">
+      <div style="font-size:11px;font-weight:600;color:var(--indigo);margin-bottom:10px">🏗️ Dato Onn (Primary Residence)</div>
+      <div class="field"><label>Current Valuation (MYR) — update anytime</label><input type="number" id="setup-datoOnnVal" placeholder="e.g. 1700000" inputmode="decimal"/></div>
+      <div style="font-size:10px;color:var(--text4);margin-top:-4px;margin-bottom:10px;font-family:'DM Mono',monospace">Purchase: RM 1,687,800 · Loan: RM 1,557,357</div>
+      <div style="font-size:11px;font-weight:600;color:var(--indigo);margin-bottom:10px">🏠 Ipoh (Airbnb Investment)</div>
+      <div class="field"><label>Current Valuation (MYR) — update anytime</label><input type="number" id="setup-ipohVal" placeholder="e.g. 450000" inputmode="decimal"/></div>
+      <div style="font-size:10px;color:var(--text4);margin-top:-4px;font-family:'DM Mono',monospace">Loan outstanding: RM 418,063 · Monthly: RM 1,919</div>
+    </div>
+
     <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin:0 0 12px">Renovation Fund</div>
     <div class="card" style="margin-bottom:20px">
       <div class="field"><label>Renovation Target (MYR)</label><input type="number" id="setup-reno-goal" placeholder="e.g. 100000" inputmode="decimal"/></div>
@@ -798,8 +808,12 @@ let profile = load("dev_profile", {
   sgdSavings:   0,
   moomooPort:   0,
   moomooCash:   0,
-  datoOnnVal:   0,
-  datoOnnEquity:0,
+  datoOnnVal:      0,
+  datoOnnEquity:   0,
+  datoOnnLoan:     1557357,
+  datoOnnPrice:    1687800,
+  ipohVal:         0,
+  ipohLoan:        418063,
 });
 
 let SGD_RATE     = parseFloat(load("dev_sgdrate", {}).rate) || 3.15;
@@ -886,8 +900,10 @@ function showSetup() {
   document.getElementById("setup-cash").value      = profile.moomooCash   || "";
   document.getElementById("setup-startmonth").value= profile.billsStartMonth;
   document.getElementById("setup-startyear").value = profile.billsStartYear;
-  const _rg=document.getElementById("setup-reno-goal");  if(_rg) _rg.value=profile.renoGoal||"";
-  const _rs=document.getElementById("setup-reno-saved"); if(_rs) _rs.value=profile.renoSaved||"";
+  const _rg=document.getElementById("setup-reno-goal");   if(_rg) _rg.value=profile.renoGoal||"";
+  const _rs=document.getElementById("setup-reno-saved");  if(_rs) _rs.value=profile.renoSaved||"";
+  const _dv=document.getElementById("setup-datoOnnVal");  if(_dv) _dv.value=profile.datoOnnVal||"";
+  const _iv=document.getElementById("setup-ipohVal");     if(_iv) _iv.value=profile.ipohVal||"";
 }
 
 function saveSetup() {
@@ -911,8 +927,10 @@ function saveSetup() {
   profile.moomooCash      = get("setup-cash");
   profile.billsStartMonth = getInt("setup-startmonth");
   profile.billsStartYear  = getInt("setup-startyear");
-  profile.renoGoal        = get("setup-reno-goal")  || 100000;
-  profile.renoSaved       = get("setup-reno-saved") || 0;
+  profile.renoGoal        = get("setup-reno-goal")   || 100000;
+  profile.renoSaved       = get("setup-reno-saved")  || 0;
+  profile.datoOnnVal      = get("setup-datoOnnVal")  || 0;
+  profile.ipohVal         = get("setup-ipohVal")     || 0;
 
   saveProfile();
   save("dev_fixed", fixedCom); // amounts still from Fixed tab
@@ -1119,11 +1137,17 @@ function saveFixed(i) {
 // 11. WEALTH
 // ══════════════════════════════════════════════════════════════════════
 function renderWealth() {
+  const datoOnnLoan  = profile.datoOnnLoan  || 1557357;
+  const ipohLoan     = profile.ipohLoan     || 418063;
+  const datoOnnVal   = profile.datoOnnVal   || 0;
+  const ipohVal      = profile.ipohVal      || 0;
+  const datoOnnEquity = datoOnnVal > 0 ? datoOnnVal - datoOnnLoan : null;
+  const ipohEquity    = ipohVal   > 0 ? ipohVal   - ipohLoan  : null;
+
   const wealthItems = [
-    { label:"SGD Savings",       val:profile.sgdSavings,  note:"Move to DBS Multiplier — up to 4.1% p.a., no lock-in", color:"var(--amber)" },
-    { label:"Moomoo Portfolio",  val:profile.moomooPort,  note:"Update monthly from Moomoo",    color:"var(--green)" },
-    { label:"Dato Onn Property", val:profile.datoOnnEquity||0, note:"Under construction",       color:"var(--text4)" },
-    { label:"Moomoo Cash",       val:profile.moomooCash,  note:"Withdrawable",                  color:"var(--green)" },
+    { label:"SGD Savings",         val:profile.sgdSavings,  note:"Move to DBS Multiplier — up to 4.1% p.a., no lock-in", color:"var(--amber)" },
+    { label:"Moomoo Portfolio",    val:profile.moomooPort,  note:"Update monthly from Moomoo",    color:"var(--green)" },
+    { label:"Moomoo Cash",         val:profile.moomooCash,  note:"Withdrawable",                  color:"var(--green)" },
   ];
   // Load actual named positions
   const positions = load("dev_positions", [
@@ -1132,10 +1156,59 @@ function renderWealth() {
     { label:"NVDA",          units:"1",     costUSD:126.50, currUSD:205.19, icon:"📈" },
   ]);
   const sgdRate = SGD_RATE || 3.15;
-  const totalTracked=wealthItems.filter(w=>w.val!=null).reduce((s,w)=>s+w.val,0);
-  document.getElementById("wealth-liquid").textContent=fmtMYR(totalTracked);
-  document.getElementById("wealth-total-label").textContent="Tracked Assets: "+fmtMYR(totalTracked);
-  document.getElementById("wealth-assets").innerHTML=`<div class="label-xs" style="margin-bottom:10px">Asset Breakdown</div>`+wealthItems.map(w=>`<div class="wealth-row"><div><div class="wealth-label">${w.label}</div><div class="wealth-note">${w.note}</div></div><div class="wealth-val" style="color:${w.color}">${w.val==null?"—":w.val===0?"RM 0":fmtMYR(w.val)}</div></div>`).join("");
+  const totalTracked = wealthItems.filter(w=>w.val!=null).reduce((s,w)=>s+w.val,0);
+  const totalEquity  = (datoOnnEquity||0) + (ipohEquity||0);
+  const grandTotal   = totalTracked + Math.max(0, totalEquity);
+
+  document.getElementById("wealth-liquid").textContent  = fmtMYR(totalTracked);
+  document.getElementById("wealth-total-label").textContent = "Tracked Assets: "+fmtMYR(totalTracked);
+
+  document.getElementById("wealth-assets").innerHTML =
+    `<div class="label-xs" style="margin-bottom:10px">Liquid & Investment Assets</div>`+
+    wealthItems.map(w=>`<div class="wealth-row"><div><div class="wealth-label">${w.label}</div><div class="wealth-note">${w.note}</div></div><div class="wealth-val" style="color:${w.color}">${w.val==null?"—":fmtMYR(w.val)}</div></div>`).join("")+
+
+    `<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+      <div class="label-xs" style="margin-bottom:10px">Properties — Equity Position</div>
+
+      <!-- Dato Onn -->
+      <div class="wealth-row">
+        <div>
+          <div class="wealth-label">🏗️ Dato Onn</div>
+          <div class="wealth-note">Loan: ${fmtMYR(datoOnnLoan)} · Purchase: RM 1.69M · Under construction</div>
+        </div>
+        <div style="text-align:right">
+          ${datoOnnVal>0
+            ? `<div class="wealth-val" style="color:${datoOnnEquity>=0?'var(--green)':'var(--red)'}">${fmtMYR(datoOnnEquity)}</div>
+               <div class="wealth-note">Val: ${fmtMYR(datoOnnVal)}</div>`
+            : `<div style="font-size:11px;color:var(--text4)">Enter valuation<br/>in Edit Profile</div>`
+          }
+        </div>
+      </div>
+
+      <!-- Ipoh -->
+      <div class="wealth-row" style="border:none">
+        <div>
+          <div class="wealth-label">🏠 Ipoh Airbnb</div>
+          <div class="wealth-note">Loan: ${fmtMYR(ipohLoan)} · Monthly: RM 1,919 · Active</div>
+        </div>
+        <div style="text-align:right">
+          ${ipohVal>0
+            ? `<div class="wealth-val" style="color:${ipohEquity>=0?'var(--green)':'var(--red)'}">${fmtMYR(ipohEquity)}</div>
+               <div class="wealth-note">Val: ${fmtMYR(ipohVal)}</div>`
+            : `<div style="font-size:11px;color:var(--text4)">Enter valuation<br/>in Edit Profile</div>`
+          }
+        </div>
+      </div>
+
+      <!-- Total net worth -->
+      <div style="margin-top:12px;padding:12px;background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:10px;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:9px;color:rgba(255,255,255,0.6);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">Estimated Net Worth</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.4)">Assets + property equity</div>
+        </div>
+        <div style="font-size:20px;font-weight:800;color:#fff">${fmtMYR(grandTotal,true)}</div>
+      </div>
+    </div>`;
 
   // Show actual positions with USD values converted to MYR
   document.getElementById("wealth-investments").innerHTML=`<div class="label-xs" style="margin-bottom:10px">Portfolio Positions</div>`+positions.map(p=>{
