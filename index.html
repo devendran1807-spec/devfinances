@@ -10,6 +10,8 @@
 <title>DevFinance</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
   :root {
     --bg:       #f0f4ff;
@@ -53,6 +55,7 @@
   .screen { display: none; padding: 0 0 24px; max-width: 480px; margin: 0 auto; }
   .screen.active { display: block; }
   .page-header { padding: 56px 20px 16px; background: linear-gradient(180deg, #e8eeff 0%, var(--bg) 100%); border-bottom: 1px solid var(--border); }
+  .page-header-flex { display:flex; justify-content:space-between; align-items:flex-start; }
   .page-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--indigo2); margin-bottom: 4px; }
   .page-title { font-size: 26px; font-weight: 800; color: var(--text1); letter-spacing: -0.5px; }
   .page-sub { font-size: 12px; color: var(--text3); margin-top: 4px; font-family: 'DM Mono', monospace; }
@@ -241,6 +244,12 @@
       <div class="field"><label>Moomoo Cash (MYR)</label><input type="number" id="setup-cash" placeholder="e.g. 4069" inputmode="decimal"/></div>
     </div>
 
+    <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin:0 0 12px">Renovation Fund</div>
+    <div class="card" style="margin-bottom:20px">
+      <div class="field"><label>Renovation Target (MYR)</label><input type="number" id="setup-reno-goal" placeholder="e.g. 100000" inputmode="decimal"/></div>
+      <div class="field"><label>Already Saved (MYR)</label><input type="number" id="setup-reno-saved" placeholder="e.g. 0" inputmode="decimal"/></div>
+    </div>
+
     <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin:0 0 12px">Bills Tracker Start</div>
     <div class="card" style="margin-bottom:28px">
       <div class="field"><label>Start Month</label><select id="setup-startmonth"></select></div>
@@ -258,10 +267,13 @@
 
 <!-- ═══════════════════════ SCREEN 1: OVERVIEW ═══════════════════════ -->
 <div id="s-overview" class="screen active">
-  <div class="page-header">
-    <div class="page-eyebrow">DevFinance OS</div>
-    <div class="page-title" id="ov-month-title">June 2026</div>
-    <div class="page-sub" id="ov-rate">SGD/MYR 3.15 · Updated today</div>
+  <div class="page-header page-header-flex">
+    <div>
+      <div class="page-eyebrow">DevFinance OS</div>
+      <div class="page-title" id="ov-month-title">June 2026</div>
+      <div class="page-sub" id="ov-rate">SGD/MYR 3.15 · Updated today</div>
+    </div>
+    <button onclick="showSetup()" style="background:var(--indigo3);border:1px solid var(--indigo2);border-radius:8px;color:var(--indigo);font-size:11px;font-weight:700;padding:6px 12px;cursor:pointer;white-space:nowrap;align-self:flex-start;margin-top:4px">✏️ Edit</button>
   </div>
   <div class="pad">
 
@@ -319,6 +331,29 @@
       <div style="display:flex;justify-content:space-between;margin-top:8px">
         <span style="font-size:11px;color:var(--text4)" id="ov-burn-pct">0% used</span>
         <span style="font-size:11px;color:var(--text4)" id="ov-burn-left">— left</span>
+      </div>
+    </div>
+
+    <!-- Renovation Fund -->
+    <div class="card" style="margin-bottom:12px;border-left:3px solid var(--purple)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="label-xs">🏚️ Renovation Fund</div>
+          <div class="value-md" style="color:var(--purple)" id="ov-reno-saved">—</div>
+          <div class="hint" id="ov-reno-hint">saved so far</div>
+        </div>
+        <div style="text-align:right">
+          <div class="label-xs">This Month</div>
+          <div style="font-size:14px;font-weight:700;color:var(--green)" id="ov-reno-monthly">—</div>
+          <div class="hint">from surplus</div>
+        </div>
+      </div>
+      <div class="progress-track" style="margin-top:10px">
+        <div class="progress-fill" id="ov-reno-fill" style="width:0%;background:var(--purple)"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:6px">
+        <span style="font-size:10px;color:var(--text4)" id="ov-reno-pct">0% of goal</span>
+        <span style="font-size:10px;color:var(--text4)" id="ov-reno-goal">Goal: —</span>
       </div>
     </div>
 
@@ -444,9 +479,9 @@
   </div>
   <div class="pad">
     <div class="card" style="margin-top:16px;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none">
-      <div class="label-xs" style="color:rgba(255,255,255,0.6)">Liquid Net Worth</div>
+      <div class="label-xs" style="color:rgba(255,255,255,0.6)">Total Tracked Assets</div>
       <div style="font-size:32px;font-weight:800;color:#fff;letter-spacing:-1px;margin:6px 0 4px" id="wealth-liquid">—</div>
-      <div style="font-size:11px;color:rgba(255,255,255,0.5);font-family:'DM Mono',monospace">Excludes property (fully leveraged)</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.5);font-family:'DM Mono',monospace">Excl. properties (fully leveraged, zero equity yet)</div>
     </div>
 
     <div class="section-title">Assets</div>
@@ -457,7 +492,7 @@
 
     <div class="card" style="background:var(--amber2);border-color:var(--amber)">
       <div class="label-xs" style="color:var(--amber);margin-bottom:6px">⚠ Action Required</div>
-      <div style="font-size:12px;color:var(--text2);line-height:1.7">SGD 38,000 idle. Singapore T-bills yield ~2.5–3% p.a. Apply via DBS/OCBC iBanking → Invest → Singapore Government Securities. Takes 20 minutes.</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.7">SGD savings earning near-zero interest? <strong>DBS Multiplier Account</strong> pays up to 4.1% p.a. with no lock-in — just credit your salary and transact in one eligible category (insurance, investments, or home loan). You likely already qualify. Open via DBS digibank app in 10 minutes.</div>
     </div>
   </div>
 </div>
@@ -516,7 +551,12 @@
         </div>
       </div>
 
-      <!-- Gap alert -->
+      <!-- Share button -->
+    <button onclick="generatePDFReport()" style="width:100%;padding:13px;background:var(--indigo);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px">
+      <span style="font-size:18px">📄</span> Generate Monthly PDF Report
+    </button>
+
+    <!-- Gap alert -->
       <div class="card" style="background:var(--red2);border-color:var(--red)">
         <div class="label-xs" style="color:var(--red);margin-bottom:6px">⚠ Gap to RM 3M Goal</div>
         <div style="font-size:12px;color:var(--text2);line-height:1.75" id="gap-text">—</div>
@@ -588,6 +628,21 @@
   </div>
 </div>
 
+<!-- ═══════════════════════ PDF RENDER CONTAINER ═══════════════════════ -->
+<div id="pdf-render-container" style="position:fixed;left:-9999px;top:0;width:800px;background:#fff;z-index:-1"></div>
+
+<!-- ═══════════════════════ PDF LOADING OVERLAY ═══════════════════════ -->
+<div id="pdf-overlay" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.85);z-index:999;flex-direction:column;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:16px;padding:32px 40px;text-align:center;max-width:280px">
+    <div style="font-size:40px;margin-bottom:12px">📄</div>
+    <div style="font-size:16px;font-weight:700;color:#0f172a;margin-bottom:6px">Generating PDF</div>
+    <div style="font-size:13px;color:#64748b" id="pdf-status">Building your report...</div>
+    <div style="margin-top:16px;background:#f1f5f9;border-radius:99px;height:4px;overflow:hidden">
+      <div id="pdf-progress-bar" style="height:100%;width:0%;background:#4f46e5;border-radius:99px;transition:width 0.4s ease"></div>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════════════════ PAYMENT PICKER MODAL ═══════════════════════ -->
 <div id="payment-modal" style="display:none;position:fixed;inset:0;z-index:500">
   <div id="payment-backdrop" onclick="closePaymentPicker()" style="position:absolute;inset:0;background:rgba(0,0,0,0.4)"></div>
@@ -644,7 +699,9 @@ const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } cat
 // ══════════════════════════════════════════════════════════════════════
 // 2. STATIC CONSTANTS (no personal data)
 // ══════════════════════════════════════════════════════════════════════
-const MONTHLY_RETURN = Math.pow(1.10, 1/12) - 1;
+const MONTHLY_RETURN_8  = Math.pow(1.08, 1/12) - 1;
+const MONTHLY_RETURN_10 = Math.pow(1.10, 1/12) - 1;
+const MONTHLY_RETURN_12 = Math.pow(1.12, 1/12) - 1;
 const MONTHS_SHORT   = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const MONTHS_FULL    = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
@@ -735,6 +792,8 @@ let profile = load("dev_profile", {
   years:        20,
   billsStartYear:  2026,
   billsStartMonth: 6,
+  renoGoal:        100000,
+  renoSaved:       0,
   // wealth items
   sgdSavings:   0,
   moomooPort:   0,
@@ -827,6 +886,8 @@ function showSetup() {
   document.getElementById("setup-cash").value      = profile.moomooCash   || "";
   document.getElementById("setup-startmonth").value= profile.billsStartMonth;
   document.getElementById("setup-startyear").value = profile.billsStartYear;
+  const _rg=document.getElementById("setup-reno-goal");  if(_rg) _rg.value=profile.renoGoal||"";
+  const _rs=document.getElementById("setup-reno-saved"); if(_rs) _rs.value=profile.renoSaved||"";
 }
 
 function saveSetup() {
@@ -850,6 +911,8 @@ function saveSetup() {
   profile.moomooCash      = get("setup-cash");
   profile.billsStartMonth = getInt("setup-startmonth");
   profile.billsStartYear  = getInt("setup-startyear");
+  profile.renoGoal        = get("setup-reno-goal")  || 100000;
+  profile.renoSaved       = get("setup-reno-saved") || 0;
 
   saveProfile();
   save("dev_fixed", fixedCom); // amounts still from Fixed tab
@@ -967,7 +1030,24 @@ function renderOverview() {
     if(g1){const btn=document.createElement("button");btn.className="qlog-btn";btn.id="qb-"+c.label;btn.innerHTML=`<span class="qlog-icon">${c.icon}</span><span class="qlog-label">${c.label}</span>`;btn.onclick=()=>openForm(c.label);(i<4?g1:g2).appendChild(btn);}
     if(catSel){const opt=document.createElement("option");opt.value=c.label;opt.textContent=c.icon+" "+c.label;catSel.appendChild(opt);}
   });
-  const fd=document.getElementById("f-date"); if(fd&&!fd.value) fd.value=now.toISOString().split("T")[0];
+  // Renovation fund — surplus goes here
+  const renoGoal    = profile.renoGoal  || 100000;
+  const renoSaved   = profile.renoSaved || 0;
+  const renoMonthly = Math.max(0, left); // whatever's left after spending
+  const renoTotal   = renoSaved + renoMonthly;
+  const renoPct     = Math.min(Math.round((renoTotal / renoGoal) * 100), 100);
+  const renoEl      = document.getElementById("ov-reno-saved");
+  const renoHint    = document.getElementById("ov-reno-hint");
+  const renoMon     = document.getElementById("ov-reno-monthly");
+  const renoFill    = document.getElementById("ov-reno-fill");
+  const renoPctEl   = document.getElementById("ov-reno-pct");
+  const renoGoalEl  = document.getElementById("ov-reno-goal");
+  if(renoEl)    renoEl.textContent    = fmtMYR(renoTotal);
+  if(renoHint)  renoHint.textContent  = "total saved incl. this month";
+  if(renoMon)   renoMon.textContent   = fmtMYR(renoMonthly);
+  if(renoFill)  renoFill.style.width  = renoPct + "%";
+  if(renoPctEl) renoPctEl.textContent = renoPct + "% of goal";
+  if(renoGoalEl)renoGoalEl.textContent= "Goal: " + fmtMYR(renoGoal);
 }
 
 function openForm(cat) {
@@ -1040,43 +1120,113 @@ function saveFixed(i) {
 // ══════════════════════════════════════════════════════════════════════
 function renderWealth() {
   const wealthItems = [
-    { label:"SGD Savings",       val:profile.sgdSavings,  note:"Consider T-bills ~2.5–3% p.a.", color:"var(--amber)" },
-    { label:"Moomoo Portfolio",  val:profile.moomooPort,  note:"Update monthly",                color:"var(--green)" },
-    { label:"Dato Onn Property", val:profile.datoOnnEquity||0, note:"Under construction",      color:"var(--text4)" },
+    { label:"SGD Savings",       val:profile.sgdSavings,  note:"Move to DBS Multiplier — up to 4.1% p.a., no lock-in", color:"var(--amber)" },
+    { label:"Moomoo Portfolio",  val:profile.moomooPort,  note:"Update monthly from Moomoo",    color:"var(--green)" },
+    { label:"Dato Onn Property", val:profile.datoOnnEquity||0, note:"Under construction",       color:"var(--text4)" },
     { label:"Moomoo Cash",       val:profile.moomooCash,  note:"Withdrawable",                  color:"var(--green)" },
   ];
-  const investments = load("dev_investments", [
-    { label:"VOO (S&P 500)", val:0, cost:0, pct:"—" },
-    { label:"SpaceX (SPCX)", val:0, cost:0, pct:"—" },
-    { label:"NVDA",          val:0, cost:0, pct:"—" },
+  // Load actual named positions
+  const positions = load("dev_positions", [
+    { label:"VOO (S&P 500)", units:"3.84",  costUSD:648.42, currUSD:681.95, icon:"svg:vanguard" },
+    { label:"SpaceX (SPCX)", units:"10",    costUSD:150.00, currUSD:160.95, icon:"svg:vanguard" },
+    { label:"NVDA",          units:"1",     costUSD:126.50, currUSD:205.19, icon:"📈" },
   ]);
-  const liquid=wealthItems.filter(w=>w.val!=null).reduce((s,w)=>s+w.val,0);
-  document.getElementById("wealth-liquid").textContent=fmtMYR(liquid);
-  document.getElementById("wealth-total-label").textContent="Liquid: "+fmtMYR(liquid);
+  const sgdRate = SGD_RATE || 3.15;
+  const totalTracked=wealthItems.filter(w=>w.val!=null).reduce((s,w)=>s+w.val,0);
+  document.getElementById("wealth-liquid").textContent=fmtMYR(totalTracked);
+  document.getElementById("wealth-total-label").textContent="Tracked Assets: "+fmtMYR(totalTracked);
   document.getElementById("wealth-assets").innerHTML=`<div class="label-xs" style="margin-bottom:10px">Asset Breakdown</div>`+wealthItems.map(w=>`<div class="wealth-row"><div><div class="wealth-label">${w.label}</div><div class="wealth-note">${w.note}</div></div><div class="wealth-val" style="color:${w.color}">${w.val==null?"—":w.val===0?"RM 0":fmtMYR(w.val)}</div></div>`).join("");
-  document.getElementById("wealth-investments").innerHTML=`<div class="label-xs" style="margin-bottom:10px">Portfolio Positions</div>`+investments.map(i=>`<div class="wealth-row"><div><div class="wealth-label">${i.label}</div><div class="wealth-note">Cost: ${fmtMYR(i.cost)}</div></div><div style="text-align:right"><div class="wealth-val">${fmtMYR(i.val)}</div><span class="badge badge-green" style="margin-top:3px;display:inline-block">${i.pct}</span></div></div>`).join("");
+
+  // Show actual positions with USD values converted to MYR
+  document.getElementById("wealth-investments").innerHTML=`<div class="label-xs" style="margin-bottom:10px">Portfolio Positions</div>`+positions.map(p=>{
+    const currMYR = p.currUSD * parseFloat(p.units) * sgdRate;
+    const costMYR = p.costUSD * parseFloat(p.units) * sgdRate;
+    const gainMYR = currMYR - costMYR;
+    const gainPct = costMYR > 0 ? ((gainMYR/costMYR)*100).toFixed(1) : "0";
+    const isGain  = gainMYR >= 0;
+    return`<div class="wealth-row"><div><div class="wealth-label">${p.label}</div><div class="wealth-note">${p.units} units · USD ${p.currUSD} · Cost USD ${p.costUSD}</div></div><div style="text-align:right"><div class="wealth-val">${fmtMYR(currMYR)}</div><span class="badge ${isGain?"badge-green":"badge-red"}" style="margin-top:3px;display:inline-block">${isGain?"+":""}${gainPct}%</span></div></div>`;
+  }).join("")+`<div style="padding:12px 0 0;border-top:1px solid var(--border);margin-top:8px;display:flex;justify-content:space-between"><span style="font-size:12px;color:var(--text3)">Approx SGD/MYR rate used</span><span style="font-size:12px;font-weight:700;font-family:'DM Mono',monospace">${sgdRate.toFixed(4)}</span></div>`;
 }
 
 // ══════════════════════════════════════════════════════════════════════
 // 12. ANALYZER
 // ══════════════════════════════════════════════════════════════════════
-function project(start,monthly,years) { let v=start; const pts=[{y:0,val:Math.round(v)}]; for(let yr=1;yr<=years;yr++){for(let m=0;m<12;m++) v=v*(1+MONTHLY_RETURN)+monthly; pts.push({y:yr,val:Math.round(v)});} return pts; }
-function monthsToGoal(start,monthly,goal) { let v=start,m=0; while(v<goal&&m<600){v=v*(1+MONTHLY_RETURN)+monthly;m++;} return m; }
-function requiredMonthly(start,goal,years) { const n=years*12,r=MONTHLY_RETURN,fv=start*Math.pow(1+r,n); return Math.max(0,Math.round((goal-fv)/((Math.pow(1+r,n)-1)/r))); }
+function project(start,monthly,years,rate) {
+  const r = rate || MONTHLY_RETURN_10;
+  let v=start; const pts=[{y:0,val:Math.round(v)}];
+  for(let yr=1;yr<=years;yr++){for(let m=0;m<12;m++) v=v*(1+r)+monthly; pts.push({y:yr,val:Math.round(v)});}
+  return pts;
+}
+function monthsToGoal(start,monthly,goal,rate) {
+  const r=rate||MONTHLY_RETURN_10; let v=start,m=0;
+  while(v<goal&&m<600){v=v*(1+r)+monthly;m++;} return m;
+}
+function requiredMonthly(start,goal,years,rate) {
+  const r=rate||MONTHLY_RETURN_10,n=years*12,fv=start*Math.pow(1+r,n);
+  return Math.max(0,Math.round((goal-fv)/((Math.pow(1+r,n)-1)/r)));
+}
 
 function renderAnalyzer() {
   const cp=profile.currentPort||0, vm=profile.vooMonthly||0, yrs=profile.years||20;
   const g1=profile.goal1||1000000, g2=profile.goal2||3000000, g3=profile.goal3||5000000;
-  const base=project(cp,vm,yrs), finalBase=base[yrs].val;
-  document.getElementById("proj-final").textContent=fmtMYR(finalBase,true);
-  const goals=[{label:"RM "+fmtMYR(g1,true).replace("RM ",""),goal:g1,color:"var(--green)"},{label:"RM "+fmtMYR(g2,true).replace("RM ",""),goal:g2,color:"var(--amber)"},{label:"RM "+fmtMYR(g3,true).replace("RM ",""),goal:g3,color:"var(--red)"}];
-  document.getElementById("milestone-list").innerHTML=goals.map(g=>{const m=monthsToGoal(cp,vm,g.goal),req=requiredMonthly(cp,g.goal,yrs),ok=m<=yrs*12;return`<div class="milestone" style="border-left:3px solid ${g.color}"><div><div class="milestone-goal" style="color:${g.color}">${g.label}</div><div class="milestone-eta">${ok?`In ${Math.floor(m/12)}y ${m%12}m`:`Beyond ${yrs}yr at current rate`}</div></div><div class="milestone-req"><div class="milestone-req-label">Need/month</div><div class="milestone-req-val" style="color:${req<=vm?"var(--green)":"var(--red)"}">RM ${req.toLocaleString()}</div></div></div>`;}).join("");
-  const chartPts=base.filter((_,i)=>i%2===0||i===yrs);
+
+  // Verify calculation inline for debugging
+  const base8  = project(cp,vm,yrs,MONTHLY_RETURN_8);
+  const base10 = project(cp,vm,yrs,MONTHLY_RETURN_10);
+  const base12 = project(cp,vm,yrs,MONTHLY_RETURN_12);
+  const final8=base8[yrs].val, final10=base10[yrs].val, final12=base12[yrs].val;
+
+  // Show 3-rate projection card
+  document.getElementById("proj-final").innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:4px">
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-size:9px;color:var(--text4);font-weight:700;letter-spacing:1px;margin-bottom:4px">8% p.a.</div>
+        <div style="font-size:14px;font-weight:800;color:var(--text2);font-family:'DM Mono',monospace">${fmtMYR(final8,true)}</div>
+      </div>
+      <div style="background:var(--indigo3);border:1px solid var(--indigo2);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-size:9px;color:var(--indigo);font-weight:700;letter-spacing:1px;margin-bottom:4px">10% p.a.</div>
+        <div style="font-size:14px;font-weight:800;color:var(--indigo);font-family:'DM Mono',monospace">${fmtMYR(final10,true)}</div>
+      </div>
+      <div style="background:var(--green2);border:1px solid #6ee7b7;border-radius:10px;padding:10px;text-align:center">
+        <div style="font-size:9px;color:var(--green);font-weight:700;letter-spacing:1px;margin-bottom:4px">12% p.a.</div>
+        <div style="font-size:14px;font-weight:800;color:var(--green);font-family:'DM Mono',monospace">${fmtMYR(final12,true)}</div>
+      </div>
+    </div>
+    <div style="font-size:10px;color:var(--text4);margin-top:8px;font-family:'DM Mono',monospace">Starting: ${fmtMYR(cp)} · Investing: ${fmtMYR(vm)}/month · ${yrs} years</div>`;
+
+  // Milestones at 10%
+  const goals=[
+    {label:fmtMYR(g1,true),goal:g1,color:"var(--green)"},
+    {label:fmtMYR(g2,true),goal:g2,color:"var(--amber)"},
+    {label:fmtMYR(g3,true),goal:g3,color:"var(--red)"},
+  ];
+  document.getElementById("milestone-list").innerHTML=goals.map(g=>{
+    const m=monthsToGoal(cp,vm,g.goal,MONTHLY_RETURN_10),req=requiredMonthly(cp,g.goal,yrs,MONTHLY_RETURN_10),ok=m<=yrs*12;
+    return`<div class="milestone" style="border-left:3px solid ${g.color}"><div><div class="milestone-goal" style="color:${g.color}">${g.label}</div><div class="milestone-eta">${ok?`In ${Math.floor(m/12)}y ${m%12}m @ 10%`:`Beyond ${yrs}yr at current rate`}</div></div><div class="milestone-req"><div class="milestone-req-label">Need/month</div><div class="milestone-req-val" style="color:${req<=vm?"var(--green)":"var(--red)"}">RM ${req.toLocaleString()}</div></div></div>`;
+  }).join("");
+
+  // Chart with all 3 lines
+  const chartPts=base10.filter((_,i)=>i%2===0||i===yrs);
+  const chartPts8=base8.filter((_,i)=>i%2===0||i===yrs);
+  const chartPts12=base12.filter((_,i)=>i%2===0||i===yrs);
   const ctx=document.getElementById("proj-chart").getContext("2d");
   if(projChart) projChart.destroy();
-  projChart=new Chart(ctx,{type:"line",data:{labels:chartPts.map(d=>"Y"+d.y),datasets:[{label:"Portfolio",data:chartPts.map(d=>d.val),borderColor:"#4f46e5",backgroundColor:"rgba(79,70,229,0.08)",borderWidth:2.5,pointRadius:2,fill:true,tension:0.4}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:v=>fmtMYR(v.raw)}}},scales:{y:{ticks:{callback:v=>fmtMYR(v,true),font:{size:9},color:"#94a3b8"},grid:{color:"#f1f5f9"}},x:{ticks:{font:{size:9},color:"#94a3b8"},grid:{display:false}}}}});
-  const req2=requiredMonthly(cp,g2,yrs);
-  document.getElementById("gap-text").innerHTML=`At ${fmtMYR(vm)}/month you finish with <strong>${fmtMYR(finalBase,true)}</strong>. Need <strong>RM ${req2.toLocaleString()}/month</strong> for ${fmtMYR(g2,true)} in ${yrs} years. Gap: <strong style="color:var(--red)">RM ${(req2-vm).toLocaleString()}/month more.</strong>`;
+  projChart=new Chart(ctx,{
+    type:"line",
+    data:{
+      labels:chartPts.map(d=>"Y"+d.y),
+      datasets:[
+        {label:"8% p.a.",  data:chartPts8.map(d=>d.val),  borderColor:"#94a3b8",backgroundColor:"transparent",borderWidth:1.5,pointRadius:0,tension:0.4,borderDash:[4,3]},
+        {label:"10% p.a.", data:chartPts.map(d=>d.val),   borderColor:"#4f46e5",backgroundColor:"rgba(79,70,229,0.08)",borderWidth:2.5,pointRadius:2,fill:true,tension:0.4},
+        {label:"12% p.a.", data:chartPts12.map(d=>d.val), borderColor:"#059669",backgroundColor:"transparent",borderWidth:1.5,pointRadius:0,tension:0.4,borderDash:[4,3]},
+      ]
+    },
+    options:{responsive:true,plugins:{legend:{display:true,position:"bottom",labels:{font:{size:9},color:"#64748b",padding:8}},tooltip:{callbacks:{label:v=>`${v.dataset.label}: ${fmtMYR(v.raw)}`}}},scales:{y:{ticks:{callback:v=>fmtMYR(v,true),font:{size:9},color:"#94a3b8"},grid:{color:"#f1f5f9"}},x:{ticks:{font:{size:9},color:"#94a3b8"},grid:{display:false}}}}
+  });
+
+  const req2=requiredMonthly(cp,g2,yrs,MONTHLY_RETURN_10);
+  document.getElementById("gap-text").innerHTML=`At ${fmtMYR(vm)}/month @ 10%: <strong>${fmtMYR(final10,true)}</strong> in ${yrs}yrs. Need <strong>RM ${req2.toLocaleString()}/month</strong> for ${fmtMYR(g2,true)}. Gap: <strong style="color:var(--red)">RM ${(req2-vm).toLocaleString()}/month more.</strong>`;
+
   updateWhatIf(0);
   if(currentSubtab!=="projection") setSubtab(currentSubtab);
 }
@@ -1088,18 +1238,17 @@ function updateWhatIf(extra) {
   const grid=document.getElementById("whatif-grid");
   if(extra>0){
     grid.style.display="grid";
-    document.getElementById("wi-base").textContent=fmtMYR(project(cp,vm,yrs)[yrs].val,true);
-    document.getElementById("wi-boost").textContent=fmtMYR(project(cp,vm+extra,yrs)[yrs].val,true);
+    document.getElementById("wi-base").textContent=fmtMYR(project(cp,vm,yrs,MONTHLY_RETURN_10)[yrs].val,true);
+    document.getElementById("wi-boost").textContent=fmtMYR(project(cp,vm+extra,yrs,MONTHLY_RETURN_10)[yrs].val,true);
     if(projChart){
-      const base=project(cp,vm,yrs).filter((_,i)=>i%2===0||i===yrs);
-      const boosted=project(cp,vm+extra,yrs).filter((_,i)=>i%2===0||i===yrs);
-      if(projChart.data.datasets.length===1) projChart.data.datasets.push({label:"Boosted",data:boosted.map(d=>d.val),borderColor:"#059669",backgroundColor:"rgba(5,150,105,0.05)",borderWidth:2,borderDash:[6,3],pointRadius:0,fill:false,tension:0.4});
-      else projChart.data.datasets[1].data=boosted.map(d=>d.val);
+      const boosted=project(cp,vm+extra,yrs,MONTHLY_RETURN_10).filter((_,i)=>i%2===0||i===yrs);
+      if(projChart.data.datasets.length===3) projChart.data.datasets.push({label:"Boosted",data:boosted.map(d=>d.val),borderColor:"#f59e0b",backgroundColor:"transparent",borderWidth:2,borderDash:[6,3],pointRadius:0,fill:false,tension:0.4});
+      else projChart.data.datasets[3].data=boosted.map(d=>d.val);
       projChart.update();
     }
   } else {
     grid.style.display="none";
-    if(projChart&&projChart.data.datasets.length>1){projChart.data.datasets.splice(1);projChart.update();}
+    if(projChart&&projChart.data.datasets.length>3){projChart.data.datasets.splice(3);projChart.update();}
   }
 }
 function renderAnalyzerSpending() {
@@ -1129,8 +1278,19 @@ function renderInsights() {
   insights.push({type:"gap",label:"🎯 Goal Gap",text:`At ${fmtMYR(vm)}/month: ${fmtMYR(g1,true)} in ${Math.floor(m1/12)}y ${m1%12}m. Need RM ${req2.toLocaleString()}/month for ${fmtMYR(g2,true)}.`});
   const ic={warn:"var(--amber)",cut:"var(--red)",invest:"var(--green)",gap:"var(--indigo)"},ib={warn:"var(--amber2)",cut:"var(--red2)",invest:"var(--green2)",gap:"var(--indigo3)"};
   document.getElementById("insights-list").innerHTML=insights.map(i=>`<div style="background:${ib[i.type]};border:1px solid;border-left:3px solid ${ic[i.type]};border-color:${ic[i.type]}44;border-radius:12px;padding:14px;margin-bottom:10px"><div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:${ic[i.type]};margin-bottom:5px">${i.label}</div><div style="font-size:12px;color:var(--text2);line-height:1.7">${i.text}</div></div>`).join("");
-  document.getElementById("improve-list").innerHTML=[{label:"Redirect avoidable spend to VOO",impact:potSave>0?`+${fmtMYR(potSave)}/month`:"Log expenses first",color:"var(--green)"},{label:"Deploy idle SGD savings to T-bills",impact:"~2.5–3% p.a. risk-free",color:"var(--indigo)"},{label:"Optimize Ipoh Airbnb occupancy",impact:"RM 600–1,500/month potential",color:"var(--amber)"},{label:`Increase investment by RM ${(req2-vm).toLocaleString()}`,impact:`→ ${fmtMYR(project(cp,vm+(req2-vm),yrs)[yrs].val,true)} in ${yrs}yr`,color:"var(--purple)"}].map(item=>`<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border)"><span style="font-size:12px;color:var(--text2);flex:1;padding-right:10px">${item.label}</span><span style="font-size:11px;color:${item.color};text-align:right;min-width:110px;font-weight:600">${item.impact}</span></div>`).join("");
-  const health=[{label:"Consistency",score:vm>=2000?7:5,note:`${fmtMYR(vm)}/month invested`},{label:"Diversification",score:5,note:"VOO-heavy — consider diversifying"},{label:"Goal Alignment",score:finalBase>=g1?7:4,note:finalBase>=g1?"On track for first goal":"Below target pace"},{label:"Cash Efficiency",score:profile.sgdSavings>50000?3:6,note:profile.sgdSavings>50000?"Large idle cash — consider T-bills":"Cash position healthy"},{label:"Income Leverage",score:6,note:"Salary strong, Airbnb developing"}];
+  document.getElementById("improve-list").innerHTML=[
+    {label:"Redirect avoidable spend to VOO",           impact:potSave>0?`+${fmtMYR(potSave)}/month`:"Log expenses first",                                              color:"var(--green)"},
+    {label:"Move SGD savings to DBS Multiplier",        impact:"Up to 4.1% p.a., no lock-in, salary already credits",                                                    color:"var(--indigo)"},
+    {label:"Optimize Ipoh Airbnb occupancy",            impact:"RM 600–1,500/month potential",                                                                            color:"var(--amber)"},
+    {label:`Increase investment by RM ${(req2-vm).toLocaleString()}`, impact:`→ ${fmtMYR(project(cp,vm+(req2-vm),yrs,MONTHLY_RETURN_10)[yrs].val,true)} in ${yrs}yr`,   color:"var(--purple)"},
+  ].map(item=>`<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border)"><span style="font-size:12px;color:var(--text2);flex:1;padding-right:10px">${item.label}</span><span style="font-size:11px;color:${item.color};text-align:right;min-width:110px;font-weight:600">${item.impact}</span></div>`).join("");
+  const health=[
+    {label:"Consistency",     score:vm>=2000?7:5,                    note:`${fmtMYR(vm)}/month invested`},
+    {label:"Diversification", score:5,                                note:"VOO-heavy — consider diversifying"},
+    {label:"Goal Alignment",  score:finalBase>=g1?7:4,               note:finalBase>=g1?"On track for first goal":"Below target pace"},
+    {label:"Cash Efficiency", score:profile.sgdSavings>50000?4:6,    note:profile.sgdSavings>50000?"Move to DBS Multiplier for 4.1% p.a.":"Cash position healthy"},
+    {label:"Income Leverage", score:6,                                note:"Salary strong, Airbnb developing"},
+  ];
   document.getElementById("health-list").innerHTML=`<div class="label-xs" style="margin-bottom:14px">Investment Health Score</div>`+health.map(h=>{const c=h.score>=7?"var(--green)":h.score>=5?"var(--amber)":"var(--red)";return`<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:12px;font-weight:500">${h.label}</span><span style="font-size:12px;font-weight:800;font-family:'DM Mono',monospace;color:${c}">${h.score}/10</span></div><div class="progress-track"><div class="progress-fill" style="width:${h.score*10}%;background:${c}"></div></div><div style="font-size:10px;color:var(--text4);margin-top:3px">${h.note}</div></div>`;}).join("");
 }
 
@@ -1260,6 +1420,241 @@ function setRateDisplay(rate,src) {
   const el=document.getElementById("ov-rate"); if(!el) return;
   const col=src==="Live"?"var(--green)":src==="Cached"?"var(--indigo)":"var(--text4)";
   el.innerHTML=`SGD/MYR <strong>${parseFloat(rate).toFixed(4)}</strong> &nbsp;<span style="color:${col};font-size:10px;font-weight:700">● ${src}</span>`;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// PDF REPORT GENERATOR
+// ══════════════════════════════════════════════════════════════════════
+async function generatePDFReport() {
+  const overlay = document.getElementById("pdf-overlay");
+  const status  = document.getElementById("pdf-status");
+  const bar     = document.getElementById("pdf-progress-bar");
+  const container = document.getElementById("pdf-render-container");
+
+  function setProgress(pct, msg) {
+    bar.style.width = pct + "%";
+    status.textContent = msg;
+  }
+
+  try {
+    overlay.style.display = "flex";
+    setProgress(5, "Gathering your data...");
+
+    const now = new Date(), m = now.getMonth(), y = now.getFullYear();
+    const exps = monthlyExpenses(m, y);
+    const spent = exps.reduce((s,e) => s + Number(e.amount), 0);
+    const disc  = discretionary(), left = disc - spent;
+    const cp = profile.currentPort||0, vm = profile.vooMonthly||0, yrs = profile.years||20;
+    const proj8  = project(cp,vm,yrs,MONTHLY_RETURN_8)[yrs].val;
+    const proj10 = project(cp,vm,yrs,MONTHLY_RETURN_10)[yrs].val;
+    const proj12 = project(cp,vm,yrs,MONTHLY_RETURN_12)[yrs].val;
+    const paidBills = BILL_DEFS.filter(d => getBillState(d.id).paid || d.auto).length;
+    const avoidable = exps.filter(e => AVOIDABLE.includes(e.cat)).reduce((s,e) => s + Number(e.amount), 0);
+    const catTotals = CATS.map(c => ({...c, total: exps.filter(e => e.cat === c.label).reduce((s,e) => s + Number(e.amount), 0)}))
+                          .filter(c => c.total > 0).sort((a,b) => b.total - a.total);
+    const totalFixedAmt = totalFixed();
+    const sgdRate = SGD_RATE || 3.15;
+    const burnPct = disc > 0 ? Math.min(Math.round((spent/disc)*100), 100) : 0;
+    const totalTracked = (profile.sgdSavings||0) + (profile.moomooPort||0) + (profile.moomooCash||0);
+    const pieColors = ["#6366f1","#f59e0b","#22c55e","#ec4899","#14b8a6","#ef4444","#a855f7","#f97316","#64748b","#0ea5e9"];
+
+    function pieSVG(slices, total, sz) {
+      if (!total || !slices.length) return `<div style="width:${sz}px;height:${sz}px;background:#f1f5f9;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#94a3b8">No data</div>`;
+      let ang = -90, paths = "";
+      slices.forEach((s,i) => {
+        const pct=s.total/total, sw=pct*360, r=sz/2-6, cx=sz/2, cy=sz/2;
+        const a1=ang*Math.PI/180, a2=(ang+sw)*Math.PI/180;
+        const x1=cx+r*Math.cos(a1), y1=cy+r*Math.sin(a1), x2=cx+r*Math.cos(a2), y2=cy+r*Math.sin(a2);
+        paths += `<path d="M${cx},${cy} L${x1.toFixed(1)},${y1.toFixed(1)} A${r},${r} 0 ${sw>180?1:0},1 ${x2.toFixed(1)},${y2.toFixed(1)} Z" fill="${pieColors[i%pieColors.length]}"/>`;
+        ang += sw;
+      });
+      return `<svg width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}" style="display:block">${paths}<circle cx="${sz/2}" cy="${sz/2}" r="${sz/4}" fill="white"/></svg>`;
+    }
+
+    setProgress(20, "Building report layout...");
+
+    container.innerHTML = `
+    <div style="font-family:Helvetica Neue,Arial,sans-serif;font-size:12px;color:#1e293b;padding:32px;background:#fff">
+
+      <!-- HEADER -->
+      <div style="background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;padding:24px 28px;border-radius:14px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:flex-end">
+        <div>
+          <div style="font-size:22px;font-weight:800;letter-spacing:-0.5px">DevFinance Monthly Report</div>
+          <div style="font-size:11px;opacity:0.7;margin-top:4px">${MONTHS_FULL[m]} ${y} · Generated ${now.toLocaleDateString('en-MY',{day:'numeric',month:'short',year:'numeric'})}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:10px;opacity:0.6">SGD / MYR</div>
+          <div style="font-size:18px;font-weight:700">${sgdRate.toFixed(4)}</div>
+        </div>
+      </div>
+
+      <!-- INCOME CARDS -->
+      <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#64748b;margin-bottom:10px;padding-left:8px;border-left:3px solid #4f46e5">Income & Cash Flow</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:20px">
+        ${[
+          {t:"Monthly Income",   v:fmtMYR(TOTAL_INCOME),    s:`SGD ${(profile.sgdSalary||0).toLocaleString()} + Airbnb`, c:"#059669"},
+          {t:"Fixed Outflows",   v:fmtMYR(totalFixedAmt),   s:`${fixedCom.length} items · ${Math.round((totalFixedAmt/TOTAL_INCOME)*100)}% of income`, c:"#dc2626"},
+          {t:"VOO Investment",   v:fmtMYR(vm),              s:"Monthly allocation", c:"#4f46e5"},
+          {t:"Discretionary",    v:fmtMYR(disc),            s:"After fixed + investment", c:"#d97706"},
+        ].map(c=>`<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px">
+          <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;margin-bottom:6px">${c.t}</div>
+          <div style="font-size:18px;font-weight:800;color:${c.c}">${c.v}</div>
+          <div style="font-size:10px;color:#94a3b8;margin-top:3px">${c.s}</div>
+        </div>`).join("")}
+      </div>
+
+      <!-- INCOME SOURCES -->
+      <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#64748b;margin-bottom:10px;padding-left:8px;border-left:3px solid #4f46e5">Income Sources</div>
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:16px;margin-bottom:20px;display:flex;align-items:center;gap:20px">
+        <div style="flex:1">
+          ${[{l:"💼 SGD Salary",v:fmtMYR(profile.sgdSalary*sgdRate)},{l:"🏠 Airbnb — Ipoh",v:fmtMYR(profile.airbnbIncome||0)},{l:"TOTAL",v:fmtMYR(TOTAL_INCOME),bold:true}].map(r=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f1f5f9"><span style="font-size:12px${r.bold?';font-weight:700':''}">${r.l}</span><strong style="color:#059669;font-size:${r.bold?'14':'12'}px">${r.v}</strong></div>`).join("")}
+        </div>
+        <div style="text-align:center">
+          ${pieSVG([{total:profile.sgdSalary*sgdRate},{total:profile.airbnbIncome||0.1}], TOTAL_INCOME, 100)}
+          <div style="display:flex;gap:8px;justify-content:center;margin-top:6px">
+            <span style="font-size:9px;color:#64748b;display:flex;align-items:center;gap:3px"><span style="width:8px;height:8px;background:#6366f1;border-radius:2px;display:inline-block"></span>Salary</span>
+            <span style="font-size:9px;color:#64748b;display:flex;align-items:center;gap:3px"><span style="width:8px;height:8px;background:#f59e0b;border-radius:2px;display:inline-block"></span>Airbnb</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SPENDING -->
+      <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#64748b;margin-bottom:10px;padding-left:8px;border-left:3px solid #4f46e5">Spending This Month</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px">
+          <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;margin-bottom:6px">Total Spent</div>
+          <div style="font-size:20px;font-weight:800;color:#dc2626">${fmtMYR(spent)}</div>
+          <div style="font-size:10px;color:#94a3b8;margin-top:3px">${burnPct}% of discretionary budget</div>
+          <div style="background:#f1f5f9;border-radius:99px;height:5px;margin-top:8px;overflow:hidden"><div style="height:100%;width:${burnPct}%;background:${burnPct<40?'#059669':burnPct<70?'#d97706':'#dc2626'};border-radius:99px"></div></div>
+        </div>
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px">
+          <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;margin-bottom:6px">Budget Remaining</div>
+          <div style="font-size:20px;font-weight:800;color:${left>=0?'#059669':'#dc2626'}">${fmtMYR(Math.abs(left))}</div>
+          <div style="font-size:10px;color:#94a3b8;margin-top:3px">${left>=0?'left this month':'OVER BUDGET'}</div>
+          ${avoidable>0?`<div style="margin-top:8px;display:inline-block;background:#fef3c7;color:#d97706;padding:3px 8px;border-radius:99px;font-size:9px;font-weight:700">⚠ ${fmtMYR(avoidable)} avoidable</div>`:''}
+        </div>
+      </div>
+
+      <!-- EXPENSE BREAKDOWN -->
+      ${catTotals.length > 0 ? `
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:16px;margin-bottom:20px">
+        <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;margin-bottom:12px">Expense Breakdown</div>
+        <div style="display:flex;gap:16px;align-items:flex-start">
+          <div>${pieSVG(catTotals, spent, 120)}<div style="font-size:9px;color:#94a3b8;text-align:center;margin-top:4px">Total: ${fmtMYR(spent)}</div></div>
+          <div style="flex:1">
+            ${catTotals.map((c,i) => {
+              const pct = spent > 0 ? Math.round((c.total/spent)*100) : 0;
+              return `<div style="margin-bottom:8px">
+                <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+                  <span style="font-size:11px">${c.icon} ${c.label}</span>
+                  <span style="font-size:11px;font-weight:700">${fmtMYR(c.total)} <span style="color:#94a3b8;font-weight:400">(${pct}%)</span></span>
+                </div>
+                <div style="background:#f1f5f9;border-radius:99px;height:5px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${pieColors[i%pieColors.length]};border-radius:99px"></div></div>
+              </div>`;
+            }).join("")}
+          </div>
+        </div>
+      </div>` : `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:24px;margin-bottom:20px;text-align:center;color:#94a3b8">No expenses logged for ${MONTHS_FULL[m]}</div>`}
+
+      <!-- BILLS -->
+      <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#64748b;margin-bottom:10px;padding-left:8px;border-left:3px solid #4f46e5">Bills & Commitments</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px">
+          <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;margin-bottom:6px">Bills Cleared</div>
+          <div style="font-size:20px;font-weight:800;color:#4f46e5">${paidBills} / ${BILL_DEFS.length}</div>
+          <div style="background:#f1f5f9;border-radius:99px;height:5px;margin-top:8px;overflow:hidden"><div style="height:100%;width:${Math.round((paidBills/BILL_DEFS.length)*100)}%;background:#4f46e5;border-radius:99px"></div></div>
+        </div>
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px">
+          <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;margin-bottom:8px">Top Commitments</div>
+          ${fixedCom.filter(f=>f.amount>0).sort((a,b)=>b.amount-a.amount).slice(0,4).map(f=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f8faff"><span style="font-size:11px">${f.label}</span><strong style="font-size:11px">${fmtMYR(f.amount)}</strong></div>`).join('')}
+        </div>
+      </div>
+
+      <!-- NET WORTH -->
+      <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#64748b;margin-bottom:10px;padding-left:8px;border-left:3px solid #4f46e5">Total Tracked Assets</div>
+      <div style="background:linear-gradient(135deg,#1e1b4b,#312e81);color:#fff;border-radius:12px;padding:20px;margin-bottom:20px">
+        <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;opacity:0.6;margin-bottom:6px">Total (excl. properties)</div>
+        <div style="font-size:28px;font-weight:800;letter-spacing:-1px">${fmtMYR(totalTracked)}</div>
+        <div style="font-size:10px;opacity:0.45;margin-top:4px">Properties excluded — fully leveraged, zero equity yet</div>
+        <div style="display:flex;justify-content:space-between;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.15)">
+          <div><div style="font-size:9px;opacity:0.55;margin-bottom:3px">SGD Savings</div><div style="font-size:13px;font-weight:700">${fmtMYR(profile.sgdSavings||0)}</div></div>
+          <div><div style="font-size:9px;opacity:0.55;margin-bottom:3px">Moomoo Portfolio</div><div style="font-size:13px;font-weight:700">${fmtMYR(profile.moomooPort||0)}</div></div>
+          <div><div style="font-size:9px;opacity:0.55;margin-bottom:3px">Moomoo Cash</div><div style="font-size:13px;font-weight:700">${fmtMYR(profile.moomooCash||0)}</div></div>
+        </div>
+      </div>
+
+      <!-- INVESTMENT PROJECTION -->
+      <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#64748b;margin-bottom:10px;padding-left:8px;border-left:3px solid #4f46e5">Investment Projection — ${yrs} Years</div>
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:16px;margin-bottom:24px">
+        <div style="font-size:10px;color:#94a3b8;margin-bottom:14px">Starting: ${fmtMYR(cp)} · Monthly: ${fmtMYR(vm)} · Horizon: ${yrs} years</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+          <div style="text-align:center;background:#f8faff;border:1px solid #e2e8f0;border-radius:10px;padding:14px">
+            <div style="font-size:9px;color:#64748b;font-weight:700;margin-bottom:5px">CONSERVATIVE 8%</div>
+            <div style="font-size:18px;font-weight:800;color:#64748b">${fmtMYR(proj8,true)}</div>
+          </div>
+          <div style="text-align:center;background:#e0e7ff;border:1px solid #a5b4fc;border-radius:10px;padding:14px">
+            <div style="font-size:9px;color:#4f46e5;font-weight:700;margin-bottom:5px">BASE CASE 10%</div>
+            <div style="font-size:18px;font-weight:800;color:#4f46e5">${fmtMYR(proj10,true)}</div>
+          </div>
+          <div style="text-align:center;background:#d1fae5;border:1px solid #6ee7b7;border-radius:10px;padding:14px">
+            <div style="font-size:9px;color:#059669;font-weight:700;margin-bottom:5px">OPTIMISTIC 12%</div>
+            <div style="font-size:18px;font-weight:800;color:#059669">${fmtMYR(proj12,true)}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <div style="text-align:center;color:#94a3b8;font-size:9px;padding-top:14px;border-top:1px solid #e2e8f0">
+        DevFinance OS · ${MONTHS_FULL[m]} ${y} · SGD/MYR ${sgdRate.toFixed(4)} · ${now.toLocaleString('en-MY')}
+      </div>
+    </div>`;
+
+    setProgress(40, "Rendering report...");
+    await new Promise(r => setTimeout(r, 100));
+
+    setProgress(60, "Capturing to canvas...");
+    const canvas = await html2canvas(container, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+    });
+
+    setProgress(80, "Building PDF...");
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+
+    const pageW   = pdf.internal.pageSize.getWidth();
+    const pageH   = pdf.internal.pageSize.getHeight();
+    const imgW    = pageW;
+    const imgH    = (canvas.height * imgW) / canvas.width;
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+    // Split across multiple pages if needed
+    let posY = 0;
+    while (posY < imgH) {
+      if (posY > 0) pdf.addPage();
+      pdf.addImage(imgData, 'JPEG', 0, -posY, imgW, imgH);
+      posY += pageH;
+    }
+
+    setProgress(95, "Saving PDF...");
+
+    const filename = `DevFinance_${MONTHS_FULL[m]}_${y}.pdf`;
+    pdf.save(filename);
+
+    setProgress(100, "Done!");
+    await new Promise(r => setTimeout(r, 800));
+
+  } catch(err) {
+    console.error("PDF error:", err);
+    status.textContent = "Error generating PDF. Try again.";
+    await new Promise(r => setTimeout(r, 2000));
+  } finally {
+    overlay.style.display = "none";
+    container.innerHTML = "";
+  }
 }
 
 // ══════════════════════════════════════════════════════════════════════
