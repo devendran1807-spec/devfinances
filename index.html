@@ -267,6 +267,16 @@
     </div>
 
     <button onclick="saveSetup()" style="width:100%;padding:16px;background:var(--indigo);border:none;border-radius:14px;color:#fff;font-size:16px;font-weight:800;cursor:pointer;letter-spacing:0.3px;margin-bottom:12px">Save & Launch DevFinance →</button>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <button onclick="exportData()" style="padding:12px;background:var(--green2);border:1px solid #6ee7b7;border-radius:10px;color:var(--green);font-size:13px;font-weight:700;cursor:pointer">📤 Export Data</button>
+      <label style="padding:12px;background:var(--indigo3);border:1px solid var(--indigo2);border-radius:10px;color:var(--indigo);font-size:13px;font-weight:700;cursor:pointer;text-align:center;display:block">
+        📥 Import Data
+        <input type="file" accept=".json" onchange="importData(event)" style="display:none"/>
+      </label>
+    </div>
+    <div style="font-size:10px;color:var(--text4);text-align:center;margin-bottom:12px">Export saves all your data as a backup JSON file. Import restores it.</div>
+
     <button onclick="resetApp()" style="width:100%;padding:12px;background:none;border:1px solid var(--border);border-radius:10px;color:var(--text4);font-size:13px;cursor:pointer">Reset All Data</button>
   </div>
 </div>
@@ -426,6 +436,37 @@
       </select>
     </div>
 
+    <!-- Airbnb Income Logger -->
+    <div class="card" style="margin-bottom:12px;border-left:3px solid var(--green)">
+      <div class="label-xs" style="margin-bottom:10px">🏠 Ipoh Airbnb Income This Month</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div style="position:relative;flex:1">
+          <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">RM</span>
+          <input type="number" id="airbnb-income-input" placeholder="0.00" inputmode="decimal"
+            style="width:100%;padding:10px 10px 10px 30px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:'DM Mono',monospace;font-weight:600;outline:none"/>
+        </div>
+        <button onclick="saveAirbnbIncome()" style="padding:10px 16px;background:var(--green);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">Save</button>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:8px">
+        <span style="font-size:11px;color:var(--text3)">Logged this month</span>
+        <span style="font-size:12px;font-weight:700;color:var(--green);font-family:'DM Mono',monospace" id="airbnb-logged">RM 0</span>
+      </div>
+    </div>
+
+    <!-- Net Cashflow card -->
+    <div class="card-grid2" style="margin-bottom:12px">
+      <div class="card-sm">
+        <div class="label-xs">Total Income</div>
+        <div class="value-sm" style="color:var(--green);font-size:15px;font-family:'DM Mono',monospace;margin-top:4px" id="exp-total-income">—</div>
+        <div class="hint">Salary + Airbnb</div>
+      </div>
+      <div class="card-sm">
+        <div class="label-xs">Net Cashflow</div>
+        <div class="value-sm" style="font-size:15px;font-family:'DM Mono',monospace;margin-top:4px" id="exp-net-cashflow">—</div>
+        <div class="hint">Income − all spend</div>
+      </div>
+    </div>
+
     <!-- Category breakdown -->
     <div class="card" id="exp-cat-breakdown">
       <div class="label-xs" style="margin-bottom:12px">By Category</div>
@@ -467,7 +508,10 @@
       </div>
     </div>
     <div class="card">
-      <div class="label-xs" style="margin-bottom:10px">Fixed Monthly — tap to edit</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div class="label-xs">Fixed Monthly — tap ✏️ to edit</div>
+        <button onclick="addNewBill()" style="background:var(--indigo3);border:1px solid var(--indigo2);border-radius:6px;color:var(--indigo);font-size:10px;font-weight:700;padding:4px 10px;cursor:pointer">+ Add</button>
+      </div>
       <div id="commit-list"></div>
     </div>
     <div class="card" style="margin-top:0">
@@ -615,6 +659,9 @@
   </div>
   <div class="pad">
     <div id="bills-month-nav" style="margin-top:16px"></div>
+    <button onclick="addNewBill()" style="width:100%;padding:12px;background:var(--indigo);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:6px">
+      + Add New Bill
+    </button>
     <div style="margin-bottom:12px">
       <div style="display:flex;justify-content:space-between;margin-bottom:8px">
         <span style="font-size:11px;font-weight:600;color:var(--text3)">MONTHLY PROGRESS</span>
@@ -770,9 +817,9 @@ const BILL_DEFS = [
   { id:"claude",    label:"Claude",            amount:0,    due:null, auto:true,  icon:"svg:claude" },
   { id:"icloud",    label:"iCloud",            amount:0,    due:null, auto:true,  icon:"svg:icloud" },
   { id:"aia",       label:"AIA Insurance",     amount:0,    due:null, auto:true,  icon:"svg:aia" },
-  { id:"amma",      label:"Amma",              amount:0,    due:null, auto:true,  icon:"👵" },
-  { id:"appa",      label:"Appa",              amount:0,    due:null, auto:true,  icon:"👴" },
-  { id:"kashmir",   label:"Kashmir Trip",      amount:0,    due:null, auto:true,  icon:"✈️" },
+  { id:"amma",      label:"Amma",              amount:0,    due:null, auto:false, icon:"👵" },
+  { id:"appa",      label:"Appa",              amount:0,    due:null, auto:false, icon:"👴" },
+  { id:"kashmir",   label:"Kashmir Trip",      amount:0,    due:null, auto:false, icon:"✈️" },
   { id:"tnb",       label:"TNB",               amount:null, due:5,    auto:false, icon:"svg:tnb",     variable:true },
   { id:"water",     label:"Water Bill",        amount:null, due:5,    auto:false, icon:"💧",          variable:true },
   { id:"voo",       label:"VOO Investment",    amount:0,    due:null, auto:false, icon:"svg:vanguard",investment:true },
@@ -1013,7 +1060,9 @@ function setSubtab(name) {
 function renderOverview() {
   const now=new Date(), m=now.getMonth(), y=now.getFullYear();
   document.getElementById("ov-month-title").textContent=MONTHS_FULL[m]+" "+y;
-  document.getElementById("ov-income").textContent=fmtMYR(TOTAL_INCOME);
+  const airbnbActual=getAirbnbIncome(m,y);
+  const actualIncome=GROSS_MYR+(airbnbActual||profile.airbnbIncome||0);
+  document.getElementById("ov-income").textContent=fmtMYR(actualIncome);
   document.getElementById("ov-fixed").textContent=fmtMYR(totalFixed());
   document.getElementById("ov-fixed-hint").textContent=fixedCom.length+" items";
   const vv=totalVar();
@@ -1090,6 +1139,83 @@ function saveExpense() {
 }
 
 // ══════════════════════════════════════════════════════════════════════
+// AIRBNB INCOME
+// ══════════════════════════════════════════════════════════════════════
+function airbnbMonthKey() {
+  const n=new Date(); return `airbnb_${n.getFullYear()}_${n.getMonth()}`;
+}
+function getAirbnbIncome(m, y) {
+  return parseFloat(load(`airbnb_${y}_${m}`, 0)) || 0;
+}
+function saveAirbnbIncome() {
+  const val = parseFloat(document.getElementById("airbnb-income-input").value) || 0;
+  const n   = new Date();
+  save(`airbnb_${n.getFullYear()}_${n.getMonth()}`, val);
+  // Update TOTAL_INCOME to include actual Airbnb
+  renderExpenses();
+  renderOverview();
+  toast(`Airbnb income ${fmtMYR(val)} saved ✓`);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// EXPORT / IMPORT
+// ══════════════════════════════════════════════════════════════════════
+function exportData() {
+  const keys = ["dev_profile","dev_expenses","dev_fixed","dev_bills","dev_positions",
+                "dev_sgdrate","dev_varbills","dev_custom_bills","dev_bill_auto",
+                "dev_investments"];
+  const data = { exportDate: new Date().toISOString(), version: "1.0" };
+  // Export all localStorage keys starting with dev_ or airbnb_
+  for(let i=0; i<localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if(k && (k.startsWith("dev_") || k.startsWith("airbnb_"))) {
+      try { data[k] = JSON.parse(localStorage.getItem(k)); } catch { data[k] = localStorage.getItem(k); }
+    }
+  }
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href     = url;
+  a.download = `DevFinance_backup_${new Date().toISOString().split("T")[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast("Data exported ✓");
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.version) { toast("⚠ Invalid backup file"); return; }
+      if (!confirm(`Import backup from ${data.exportDate?.split("T")[0]}? This will overwrite your current data.`)) return;
+      Object.entries(data).forEach(([k,v]) => {
+        if (k === "exportDate" || k === "version") return;
+        localStorage.setItem(k, JSON.stringify(v));
+      });
+      // Reload app state
+      expenses   = load("dev_expenses", []);
+      fixedCom   = load("dev_fixed", DEFAULT_FIXED);
+      billsState = load("dev_bills", {});
+      profile    = load("dev_profile", {});
+      GROSS_MYR    = (profile.sgdSalary||0) * SGD_RATE;
+      TOTAL_INCOME = GROSS_MYR + (profile.airbnbIncome||0);
+      syncBillAmounts();
+      document.getElementById("setup-screen").style.display = "none";
+      document.getElementById("app-shell").style.display    = "block";
+      renderOverview();
+      renderCommitments();
+      toast("Data imported successfully ✓");
+    } catch(err) {
+      toast("⚠ Failed to import — invalid file");
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ══════════════════════════════════════════════════════════════════════
 // 9. EXPENSES
 // ══════════════════════════════════════════════════════════════════════
 function renderExpenses() {
@@ -1097,6 +1223,23 @@ function renderExpenses() {
   if(!mSel||!ySel) return;
   const m=parseInt(mSel.value), y=parseInt(ySel.value);
   const exps=monthlyExpenses(m,y), total=exps.reduce((s,e)=>s+Number(e.amount),0);
+
+  // Airbnb income for this month
+  const airbnbThisMonth = getAirbnbIncome(m, y);
+  const airbnbInput = document.getElementById("airbnb-income-input");
+  const airbnbLogged = document.getElementById("airbnb-logged");
+  const isCurrentMonth = m === new Date().getMonth() && y === new Date().getFullYear();
+  if(airbnbInput && isCurrentMonth) airbnbInput.value = airbnbThisMonth || "";
+  if(airbnbLogged) airbnbLogged.textContent = fmtMYR(airbnbThisMonth);
+
+  // Net cashflow = salary MYR + airbnb actual - total spent
+  const salaryMYR    = (profile.sgdSalary||0) * SGD_RATE;
+  const totalIncomeM = salaryMYR + airbnbThisMonth;
+  const netCashflow  = totalIncomeM - total;
+  const ncEl = document.getElementById("exp-net-cashflow");
+  const tiEl = document.getElementById("exp-total-income");
+  if(tiEl) tiEl.textContent = fmtMYR(totalIncomeM);
+  if(ncEl) { ncEl.textContent = fmtMYR(Math.abs(netCashflow)); ncEl.style.color = netCashflow>=0?"var(--green)":"var(--red)"; }
   const catTotals=CATS.map(c=>({...c,total:exps.filter(e=>e.cat===c.label).reduce((s,e)=>s+Number(e.amount),0)})).filter(c=>c.total>0).sort((a,b)=>b.total-a.total);
   const catList=document.getElementById("exp-cat-list");
   catList.innerHTML=catTotals.length===0?'<div style="color:var(--text4);font-size:13px;padding:8px 0">No data for this period.</div>':catTotals.map(c=>{const pct=total>0?Math.round((c.total/total)*100):0;return`<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px;font-weight:500">${c.icon} ${c.label}</span><span style="font-size:12px;font-weight:700;font-family:'DM Mono',monospace">${fmtMYR(c.total)} <span style="color:var(--text4);font-weight:400">(${pct}%)</span></span></div><div class="progress-track"><div class="progress-fill" style="width:${pct}%;background:${c.color}"></div></div></div>`;}).join("");
@@ -1151,9 +1294,11 @@ function renderWealth() {
   ];
   // Load actual named positions
   const positions = load("dev_positions", [
-    { label:"VOO (S&P 500)", units:"3.84",  costUSD:648.42, currUSD:681.95, icon:"svg:vanguard" },
-    { label:"SpaceX (SPCX)", units:"10",    costUSD:150.00, currUSD:160.95, icon:"svg:vanguard" },
-    { label:"NVDA",          units:"1",     costUSD:126.50, currUSD:205.19, icon:"📈" },
+    { label:"VOO (S&P 500)", units:"3.84",  costUSD:648.42, currUSD:681.95 },
+    { label:"QQQM",          units:"0",     costUSD:0,      currUSD:0      },
+    { label:"SMH",           units:"0",     costUSD:0,      currUSD:0      },
+    { label:"SpaceX (SPCX)", units:"10",    costUSD:150.00, currUSD:160.95 },
+    { label:"NVDA",          units:"1",     costUSD:126.50, currUSD:205.19 },
   ]);
   const sgdRate = SGD_RATE || 3.15;
   const totalTracked = wealthItems.filter(w=>w.val!=null).reduce((s,w)=>s+w.val,0);
@@ -1210,15 +1355,74 @@ function renderWealth() {
       </div>
     </div>`;
 
-  // Show actual positions with USD values converted to MYR
-  document.getElementById("wealth-investments").innerHTML=`<div class="label-xs" style="margin-bottom:10px">Portfolio Positions</div>`+positions.map(p=>{
-    const currMYR = p.currUSD * parseFloat(p.units) * sgdRate;
-    const costMYR = p.costUSD * parseFloat(p.units) * sgdRate;
-    const gainMYR = currMYR - costMYR;
-    const gainPct = costMYR > 0 ? ((gainMYR/costMYR)*100).toFixed(1) : "0";
-    const isGain  = gainMYR >= 0;
-    return`<div class="wealth-row"><div><div class="wealth-label">${p.label}</div><div class="wealth-note">${p.units} units · USD ${p.currUSD} · Cost USD ${p.costUSD}</div></div><div style="text-align:right"><div class="wealth-val">${fmtMYR(currMYR)}</div><span class="badge ${isGain?"badge-green":"badge-red"}" style="margin-top:3px;display:inline-block">${isGain?"+":""}${gainPct}%</span></div></div>`;
-  }).join("")+`<div style="padding:12px 0 0;border-top:1px solid var(--border);margin-top:8px;display:flex;justify-content:space-between"><span style="font-size:12px;color:var(--text3)">Approx SGD/MYR rate used</span><span style="font-size:12px;font-weight:700;font-family:'DM Mono',monospace">${sgdRate.toFixed(4)}</span></div>`;
+
+function renderPositions(positions, sgdRate) {
+    return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="label-xs">Portfolio Positions</div>
+      <button onclick="addPortfolioPosition()" style="background:var(--indigo3);border:1px solid var(--indigo2);border-radius:6px;color:var(--indigo);font-size:10px;font-weight:700;padding:4px 10px;cursor:pointer">+ Add ETF / Stock</button>
+    </div>`+
+    positions.map((p,i)=>{
+      const units   = parseFloat(p.units||0);
+      const currMYR = p.currUSD * units * sgdRate;
+      const costMYR = p.costUSD * units * sgdRate;
+      const gainMYR = currMYR - costMYR;
+      const gainPct = costMYR > 0 ? ((gainMYR/costMYR)*100).toFixed(1) : "0";
+      const isGain  = gainMYR >= 0;
+      return `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="font-size:13px;font-weight:700;color:var(--text1)">${p.label}</div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <span class="badge ${isGain?"badge-green":"badge-red"}">${isGain?"+":""}${gainPct}%</span>
+            <button onclick="removePosition(${i})" style="background:var(--red2);border:none;border-radius:4px;color:var(--red);font-size:10px;font-weight:700;padding:2px 6px;cursor:pointer">✕</button>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+          <div><div style="font-size:9px;color:var(--text4);margin-bottom:3px">Units</div>
+            <input type="number" value="${p.units||0}" inputmode="decimal" style="width:100%;padding:5px 7px;background:#fff;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Mono',monospace;outline:none" onchange="updatePosition(${i},'units',this.value)"/></div>
+          <div><div style="font-size:9px;color:var(--text4);margin-bottom:3px">Avg Cost USD</div>
+            <input type="number" value="${p.costUSD||0}" inputmode="decimal" style="width:100%;padding:5px 7px;background:#fff;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Mono',monospace;outline:none" onchange="updatePosition(${i},'costUSD',parseFloat(this.value)||0)"/></div>
+          <div><div style="font-size:9px;color:var(--text4);margin-bottom:3px">Current USD</div>
+            <input type="number" value="${p.currUSD||0}" inputmode="decimal" style="width:100%;padding:5px 7px;background:#fff;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Mono',monospace;outline:none" onchange="updatePosition(${i},'currUSD',parseFloat(this.value)||0)"/></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+          <span style="font-size:11px;color:var(--text3)">MYR Value</span>
+          <span style="font-size:13px;font-weight:700;font-family:'DM Mono',monospace;color:var(--indigo)">${fmtMYR(currMYR)}</span>
+        </div>
+      </div>`;
+    }).join("")+
+    `<div style="padding:10px 0;display:flex;justify-content:space-between;border-top:1px solid var(--border)">
+      <span style="font-size:12px;font-weight:600;color:var(--text2)">Total Portfolio (MYR)</span>
+      <span style="font-size:14px;font-weight:800;font-family:'DM Mono',monospace;color:var(--indigo)">${fmtMYR(positions.reduce((s,p)=>s+(p.currUSD*parseFloat(p.units||0)*sgdRate),0))}</span>
+    </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// PORTFOLIO MANAGEMENT
+// ══════════════════════════════════════════════════════════════════════
+function updatePosition(idx, field, value) {
+  const positions = load("dev_positions", []);
+  if (!positions[idx]) return;
+  positions[idx][field] = field === 'units' ? value : parseFloat(value)||0;
+  save("dev_positions", positions);
+  renderWealth();
+}
+
+function removePosition(idx) {
+  const positions = load("dev_positions", []);
+  positions.splice(idx, 1);
+  save("dev_positions", positions);
+  renderWealth();
+  toast("Position removed");
+}
+
+function addPortfolioPosition() {
+  const label = prompt("Ticker / Name (e.g. QQQM, SMH):");
+  if (!label || !label.trim()) return;
+  const positions = load("dev_positions", []);
+  positions.push({ label: label.trim().toUpperCase(), units: "0", costUSD: 0, currUSD: 0 });
+  save("dev_positions", positions);
+  renderWealth();
+  toast("Position added — enter your units and prices");
 }
 
 // ══════════════════════════════════════════════════════════════════════
@@ -1412,12 +1616,62 @@ function renderBills() {
     const cardBg=def.investment&&!st.paid?"#f5f3ff":cfg.bg,cardBorder=def.investment&&!st.paid?"#c4b5fd":cfg.border;
     const statusLabel=def.investment&&!st.paid?"PENDING":cfg.label,statusColor=def.investment&&!st.paid?"var(--purple)":cfg.color;
     const amountField=def.variable||def.investment?`<div style="margin-bottom:8px"><div style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">${def.investment?"Amount":"Amount This Month"}</div><div style="position:relative"><span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">RM</span><input type="number" placeholder="0.00" value="${st.amount||def.amount||''}" inputmode="decimal" style="width:100%;padding:8px 8px 8px 28px;background:#fff;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Mono',monospace;outline:none" onchange="saveBillState('${def.id}',{amount:parseFloat(this.value)||null});renderBills()"/></div></div>`:`<div style="margin-bottom:8px"><div style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Amount <span style="color:var(--text4);font-weight:400">(tap to edit)</span></div><div style="position:relative"><span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">RM</span><input type="number" value="${displayAmt||''}" inputmode="decimal" style="width:100%;padding:8px 8px 8px 28px;background:#fff;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Mono',monospace;outline:none" onchange="saveBillState('${def.id}',{amount:parseFloat(this.value)||null});renderBills()"/></div></div>`;
-    const innerContent=def.auto?`<div style="font-size:11px;color:var(--text4);font-style:italic">Auto-deducted — no action needed</div>`:`${amountField}${pmPickerBtn(def.id,st.payment)}<input type="text" placeholder="Note (optional)" value="${st.note||''}" style="width:100%;padding:8px 10px;background:#fff;border:1px solid var(--border);border-radius:8px;font-size:12px;outline:none;margin-bottom:10px" onchange="saveBillState('${def.id}',{note:this.value})"/><button onclick="togglePaid('${def.id}')" style="width:100%;padding:10px;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;background:${st.paid?"var(--surface2)":"var(--indigo)"};color:${st.paid?"var(--text3)":"#fff"}">${st.paid?"✓ Paid — Tap to Undo":"Mark as Paid"}</button>`;
-    return`${divider}<div style="background:${cardBg};border:1px solid ${cardBorder};border-radius:12px;padding:14px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px"><div style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center">${iconHtml(def.icon,24)}</div><div><div style="font-size:13px;font-weight:600;color:var(--text1)">${def.label}</div><div style="font-size:10px;color:var(--text4);margin-top:1px;font-family:'DM Mono',monospace">${dueDayLabel(def)}</div></div></div><div style="text-align:right"><div style="font-size:14px;font-weight:800;font-family:'DM Mono',monospace;color:var(--text1)">${displayAmt!=null?fmtMYR(displayAmt):"Variable"}</div><span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:99px;background:${statusColor}22;color:${statusColor};letter-spacing:0.5px;text-transform:uppercase">${statusLabel}</span></div></div>${innerContent}</div>`;
+    // Auto-deduct toggle shown on every card
+    const autoToggle = `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);margin-bottom:8px">
+      <span style="font-size:11px;color:var(--text2);font-weight:500">Auto-deduct</span>
+      <button onclick="toggleBillAuto('${def.id}')" style="background:${def.auto?'var(--indigo)':'var(--surface2)'};border:1px solid ${def.auto?'var(--indigo2)':'var(--border)'};border-radius:99px;padding:4px 12px;font-size:10px;font-weight:700;color:${def.auto?'#fff':'var(--text3)'};cursor:pointer">
+        ${def.auto?'ON — tap to set manual':'OFF — tap to set auto'}
+      </button>
+    </div>`;
+
+    const innerContent = def.auto
+      ? `${autoToggle}<div style="font-size:11px;color:var(--text4);font-style:italic;padding:4px 0">No action needed — tracked automatically</div>`
+      : `${autoToggle}${amountField}${pmPickerBtn(def.id,st.payment)}<input type="text" placeholder="Note (optional)" value="${st.note||''}" style="width:100%;padding:8px 10px;background:#fff;border:1px solid var(--border);border-radius:8px;font-size:12px;outline:none;margin-bottom:10px" onchange="saveBillState('${def.id}',{note:this.value})"/><button onclick="togglePaid('${def.id}')" style="width:100%;padding:10px;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;background:${st.paid?"var(--surface2)":"var(--indigo)"};color:${st.paid?"var(--text3)":"#fff"}">${st.paid?"✓ Paid — Tap to Undo":"Mark as Paid"}</button>`;
+    return`${divider}<div style="background:${cardBg};border:1px solid ${cardBorder};border-radius:12px;padding:14px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px"><div style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center">${iconHtml(def.icon,24)}</div><div><div style="font-size:13px;font-weight:600;color:var(--text1)">${def.label}</div><div style="font-size:10px;color:var(--text4);margin-top:1px;font-family:'DM Mono',monospace">${dueDayLabel(def)}</div></div></div><div style="display:flex;align-items:flex-start;gap:8px"><div style="text-align:right"><div style="font-size:14px;font-weight:800;font-family:'DM Mono',monospace;color:var(--text1)">${displayAmt!=null?fmtMYR(displayAmt):"Variable"}</div><span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:99px;background:${statusColor}22;color:${statusColor};letter-spacing:0.5px;text-transform:uppercase">${statusLabel}</span></div>${def.custom?`<button onclick="deleteBill('${def.id}')" style="background:var(--red2);border:none;border-radius:6px;color:var(--red);font-size:11px;font-weight:700;padding:3px 7px;cursor:pointer;margin-top:2px">✕</button>`:''}
+</div></div>${innerContent}</div>`;
   }).join("");
 }
 
-function togglePaid(id) {
+function toggleBillAuto(id) {
+  const def = BILL_DEFS.find(d => d.id === id);
+  if (!def) return;
+  def.auto = !def.auto;
+  // Save custom auto overrides to localStorage
+  const autoOverrides = load("dev_bill_auto", {});
+  autoOverrides[id] = def.auto;
+  save("dev_bill_auto", autoOverrides);
+  renderBills();
+  toast(def.auto ? "Set to auto-deduct" : "Set to manual");
+}
+
+function addNewBill() {
+  const label = prompt("Bill name:");
+  if (!label || !label.trim()) return;
+  const amount = parseFloat(prompt("Monthly amount (RM):") || "0") || 0;
+  const id = "custom_" + Date.now();
+  BILL_DEFS.push({ id, label: label.trim(), amount, due: null, auto: false, icon: "📌", custom: true });
+  fixedCom.push({ label: label.trim(), amount });
+  save("dev_fixed", fixedCom);
+  const customBills = load("dev_custom_bills", []);
+  customBills.push({ id, label: label.trim(), amount, due: null, auto: false, icon: "📌", custom: true });
+  save("dev_custom_bills", customBills);
+  renderBills();
+  renderCommitments();
+  toast("Bill added ✓");
+}
+
+function deleteBill(id) {
+  const idx = BILL_DEFS.findIndex(d => d.id === id);
+  if (idx > -1) BILL_DEFS.splice(idx, 1);
+  const fcIdx = fixedCom.findIndex(f => f.id === id);
+  if (fcIdx > -1) fixedCom.splice(fcIdx, 1);
+  save("dev_fixed", fixedCom);
+  const customBills = load("dev_custom_bills", []).filter(b => b.id !== id);
+  save("dev_custom_bills", customBills);
+  renderBills();
+  renderCommitments();
+  toast("Bill removed");
+}
   const def=BILL_DEFS.find(d=>d.id===id),st=getBillState(id),nowPaid=!st.paid;
   saveBillState(id,{paid:nowPaid});
   if(nowPaid&&!def.auto){
@@ -1743,6 +1997,15 @@ async function generatePDFReport() {
   const sms=document.getElementById("setup-startmonth");
   if(sms) MONTHS_SHORT.forEach((m,i)=>{const o=document.createElement("option");o.value=i;o.textContent=m;if(i===profile.billsStartMonth) o.selected=true;sms.appendChild(o);});
 
+  // Load custom bills added by user
+  const _customBills = load("dev_custom_bills", []);
+  _customBills.forEach(b => { if (!BILL_DEFS.find(d => d.id === b.id)) BILL_DEFS.push(b); });
+  // Load auto overrides
+  const _autoOverrides = load("dev_bill_auto", {});
+  Object.entries(_autoOverrides).forEach(([id, val]) => {
+    const def = BILL_DEFS.find(d => d.id === id);
+    if (def) def.auto = val;
+  });
   if(!isSetupDone()) {
     showSetup();
   } else {
