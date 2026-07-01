@@ -203,6 +203,8 @@
   .toast.show { transform: translateX(-50%) translateY(0); }
 
   canvas { display: block; }
+  .subtab-btn { flex:1; padding:7px 4px; background:none; border:none; border-radius:7px; font-size:11px; font-weight:600; color:var(--text3); cursor:pointer; transition:all 0.12s; -webkit-tap-highlight-color:transparent; }
+  .subtab-btn.active { background:var(--indigo); color:#fff; }
 </style>
 </head>
 <body>
@@ -419,74 +421,6 @@
   </div>
 </div>
 
-<!-- ═══════════════════════ SCREEN 2: EXPENSES ═══════════════════════ -->
-<div id="s-expenses" class="screen">
-  <div class="page-header">
-    <div class="page-eyebrow">Tracker</div>
-    <div class="page-title">Expenses</div>
-    <div class="page-sub" id="exp-month-label">June 2026</div>
-  </div>
-  <div class="pad">
-    <div class="month-sel" style="margin-top:16px">
-      <select id="exp-month-sel" onchange="renderExpenses()"></select>
-      <select id="exp-year-sel" onchange="renderExpenses()">
-        <option value="2025">2025</option>
-        <option value="2026" selected>2026</option>
-        <option value="2027">2027</option>
-      </select>
-    </div>
-
-    <!-- Airbnb Income Logger -->
-    <div class="card" style="margin-bottom:12px;border-left:3px solid var(--green)">
-      <div class="label-xs" style="margin-bottom:10px">🏠 Ipoh Airbnb Income This Month</div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <div style="position:relative;flex:1">
-          <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">RM</span>
-          <input type="number" id="airbnb-income-input" placeholder="0.00" inputmode="decimal"
-            style="width:100%;padding:10px 10px 10px 30px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:'DM Mono',monospace;font-weight:600;outline:none"/>
-        </div>
-        <button onclick="saveAirbnbIncome()" style="padding:10px 16px;background:var(--green);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">Save</button>
-      </div>
-      <div style="display:flex;justify-content:space-between;margin-top:8px">
-        <span style="font-size:11px;color:var(--text3)">Logged this month</span>
-        <span style="font-size:12px;font-weight:700;color:var(--green);font-family:'DM Mono',monospace" id="airbnb-logged">RM 0</span>
-      </div>
-    </div>
-
-    <!-- Net Cashflow card -->
-    <div class="card-grid2" style="margin-bottom:12px">
-      <div class="card-sm">
-        <div class="label-xs">Total Income</div>
-        <div class="value-sm" style="color:var(--green);font-size:15px;font-family:'DM Mono',monospace;margin-top:4px" id="exp-total-income">—</div>
-        <div class="hint">Salary + Airbnb</div>
-      </div>
-      <div class="card-sm">
-        <div class="label-xs">Net Cashflow</div>
-        <div class="value-sm" style="font-size:15px;font-family:'DM Mono',monospace;margin-top:4px" id="exp-net-cashflow">—</div>
-        <div class="hint">Income − all spend</div>
-      </div>
-    </div>
-
-    <!-- Category breakdown -->
-    <div class="card" id="exp-cat-breakdown">
-      <div class="label-xs" style="margin-bottom:12px">By Category</div>
-      <div id="exp-cat-list"></div>
-    </div>
-
-    <!-- Pie chart -->
-    <div class="chart-box">
-      <div class="chart-title">Spend Distribution</div>
-      <canvas id="pie-chart" height="200"></canvas>
-    </div>
-
-    <!-- Entries -->
-    <div class="section-title">All Entries</div>
-    <div class="card">
-      <div id="exp-list"><div style="color:var(--text4);font-size:13px;padding:16px 0;text-align:center">No expenses logged yet.</div></div>
-    </div>
-  </div>
-</div>
-
 <!-- ═══════════════════════ SCREEN 3: COMMITMENTS ═══════════════════════ -->
 <div id="s-commitments" class="screen">
   <div class="page-header">
@@ -650,6 +584,35 @@
   </div>
 </div>
 
+
+<!-- ═══════════════════════ PDF RENDER CONTAINER ═══════════════════════ -->
+<div id="pdf-render-container" style="position:fixed;left:-9999px;top:0;width:800px;background:#fff;z-index:-1"></div>
+
+<!-- ═══════════════════════ PDF LOADING OVERLAY ═══════════════════════ -->
+<div id="pdf-overlay" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.85);z-index:999;flex-direction:column;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:16px;padding:32px 40px;text-align:center;max-width:280px">
+    <div style="font-size:40px;margin-bottom:12px">📄</div>
+    <div style="font-size:16px;font-weight:700;color:#0f172a;margin-bottom:6px">Generating PDF</div>
+    <div style="font-size:13px;color:#64748b" id="pdf-status">Building your report...</div>
+    <div style="margin-top:16px;background:#f1f5f9;border-radius:99px;height:4px;overflow:hidden">
+      <div id="pdf-progress-bar" style="height:100%;width:0%;background:#4f46e5;border-radius:99px;transition:width 0.4s ease"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ PAYMENT PICKER MODAL ═══════════════════════ -->
+<div id="payment-modal" style="display:none;position:fixed;inset:0;z-index:500">
+  <div id="payment-backdrop" onclick="closePaymentPicker()" style="position:absolute;inset:0;background:rgba(0,0,0,0.4)"></div>
+  <div style="position:absolute;bottom:0;left:0;right:0;background:#fff;border-radius:20px 20px 0 0;padding:0 0 env(safe-area-inset-bottom,16px);max-height:75vh;overflow-y:auto;transform:translateY(100%);transition:transform 0.3s ease" id="payment-sheet">
+    <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:14px;font-weight:700;color:var(--text1)">Select Payment Method</span>
+      <button onclick="closePaymentPicker()" style="background:none;border:none;font-size:22px;color:var(--text3);cursor:pointer;line-height:1">×</button>
+    </div>
+    <div id="payment-options" style="padding:8px 12px 16px"></div>
+  </div>
+</div>
+
+</div><!-- end app-shell -->
 <!-- ═══════════════════════ SCREEN 6: BILLS CHECKLIST ═══════════════════════ -->
 <div id="s-bills" class="screen">
   <div class="page-header">
@@ -685,33 +648,6 @@
   </div>
 </div>
 
-<!-- ═══════════════════════ PDF RENDER CONTAINER ═══════════════════════ -->
-<div id="pdf-render-container" style="position:fixed;left:-9999px;top:0;width:800px;background:#fff;z-index:-1"></div>
-
-<!-- ═══════════════════════ PDF LOADING OVERLAY ═══════════════════════ -->
-<div id="pdf-overlay" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.85);z-index:999;flex-direction:column;align-items:center;justify-content:center">
-  <div style="background:#fff;border-radius:16px;padding:32px 40px;text-align:center;max-width:280px">
-    <div style="font-size:40px;margin-bottom:12px">📄</div>
-    <div style="font-size:16px;font-weight:700;color:#0f172a;margin-bottom:6px">Generating PDF</div>
-    <div style="font-size:13px;color:#64748b" id="pdf-status">Building your report...</div>
-    <div style="margin-top:16px;background:#f1f5f9;border-radius:99px;height:4px;overflow:hidden">
-      <div id="pdf-progress-bar" style="height:100%;width:0%;background:#4f46e5;border-radius:99px;transition:width 0.4s ease"></div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════ PAYMENT PICKER MODAL ═══════════════════════ -->
-<div id="payment-modal" style="display:none;position:fixed;inset:0;z-index:500">
-  <div id="payment-backdrop" onclick="closePaymentPicker()" style="position:absolute;inset:0;background:rgba(0,0,0,0.4)"></div>
-  <div style="position:absolute;bottom:0;left:0;right:0;background:#fff;border-radius:20px 20px 0 0;padding:0 0 env(safe-area-inset-bottom,16px);max-height:75vh;overflow-y:auto;transform:translateY(100%);transition:transform 0.3s ease" id="payment-sheet">
-    <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
-      <span style="font-size:14px;font-weight:700;color:var(--text1)">Select Payment Method</span>
-      <button onclick="closePaymentPicker()" style="background:none;border:none;font-size:22px;color:var(--text3);cursor:pointer;line-height:1">×</button>
-    </div>
-    <div id="payment-options" style="padding:8px 12px 16px"></div>
-  </div>
-</div>
-
 <!-- ═══════════════════════ BOTTOM NAV ═══════════════════════ -->
 <nav>
   <button class="nav-btn active" onclick="showScreen('overview',this)" id="nav-overview">
@@ -719,11 +655,7 @@
     <span class="nav-label">Overview</span>
     <div class="nav-dot"></div>
   </button>
-  <button class="nav-btn" onclick="showScreen('expenses',this)" id="nav-expenses">
-    <span class="nav-icon">↓</span>
-    <span class="nav-label">Expenses</span>
-    <div class="nav-dot"></div>
-  </button>
+
   <button class="nav-btn" onclick="showScreen('commitments',this)" id="nav-commitments">
     <span class="nav-icon">≡</span>
     <span class="nav-label">Fixed</span>
@@ -745,7 +677,6 @@
     <div class="nav-dot"></div>
   </button>
 </nav>
-</div><!-- end app-shell -->
 <script>
 // ══════════════════════════════════════════════════════════════════════
 // 1. STORAGE HELPERS
@@ -1041,7 +972,6 @@ function showScreen(name,btn) {
   document.getElementById("s-"+name).classList.add("active");
   btn.classList.add("active");
   if(name==="overview")    renderOverview();
-  if(name==="expenses")    renderExpenses();
   if(name==="commitments") renderCommitments();
   if(name==="wealth")      renderWealth();
   if(name==="analyzer")    renderAnalyzer();
@@ -1148,7 +1078,8 @@ function getAirbnbIncome(m, y) {
   return parseFloat(load(`airbnb_${y}_${m}`, 0)) || 0;
 }
 function saveAirbnbIncome() {
-  const val = parseFloat(document.getElementById("airbnb-income-input").value) || 0;
+  const el = document.getElementById("airbnb-income-input");
+  const val = el ? parseFloat(el.value) || 0 : 0;
   const n   = new Date();
   save(`airbnb_${n.getFullYear()}_${n.getMonth()}`, val);
   // Update TOTAL_INCOME to include actual Airbnb
@@ -1231,7 +1162,6 @@ function renderExpenses() {
   const isCurrentMonth = m === new Date().getMonth() && y === new Date().getFullYear();
   if(airbnbInput && isCurrentMonth) airbnbInput.value = airbnbThisMonth || "";
   if(airbnbLogged) airbnbLogged.textContent = fmtMYR(airbnbThisMonth);
-
   // Net cashflow = salary MYR + airbnb actual - total spent
   const salaryMYR    = (profile.sgdSalary||0) * SGD_RATE;
   const totalIncomeM = salaryMYR + airbnbThisMonth;
@@ -1574,6 +1504,18 @@ function renderInsights() {
 // ══════════════════════════════════════════════════════════════════════
 // 13. BILLS
 // ══════════════════════════════════════════════════════════════════════
+const PAYMENT_METHODS = [
+  { value:"CC UOB",       label:"UOB PRVI Miles",  sub:"Credit Card", svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#003087"/><text x="20" y="26" text-anchor="middle" font-size="13" font-weight="900" fill="#fff" font-family="sans-serif">UOB</text></svg>` },
+  { value:"CC CIMB",      label:"CIMB",            sub:"Credit Card", svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#C8102E"/><text x="20" y="27" text-anchor="middle" font-size="10" font-weight="900" fill="#fff" font-family="sans-serif">CIMB</text></svg>` },
+  { value:"QR Maybank",   label:"Maybank",         sub:"QR Pay",      svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#FFCC00"/><text x="20" y="27" text-anchor="middle" font-size="8" font-weight="900" fill="#1a1a1a" font-family="sans-serif">Maybank</text></svg>` },
+  { value:"QR Ambank",    label:"AmBank",          sub:"QR Pay",      svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#E4002B"/><text x="20" y="27" text-anchor="middle" font-size="8" font-weight="900" fill="#fff" font-family="sans-serif">AmBank</text></svg>` },
+  { value:"QR CIMB",      label:"CIMB",            sub:"QR Pay",      svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#C8102E"/><text x="20" y="27" text-anchor="middle" font-size="10" font-weight="900" fill="#fff" font-family="sans-serif">CIMB</text></svg>` },
+  { value:"TnG",          label:"Touch & Go",      sub:"eWallet",     svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#00A0E3"/><text x="20" y="24" text-anchor="middle" font-size="11" font-weight="900" fill="#fff" font-family="sans-serif">TnG</text></svg>` },
+  { value:"Debit Card",   label:"Debit Card",      sub:"Any bank",    svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#64748b"/><rect x="6" y="13" width="28" height="18" rx="3" fill="none" stroke="#fff" stroke-width="2"/><rect x="6" y="19" width="28" height="5" fill="#fff" opacity="0.4"/></svg>` },
+  { value:"Bank Transfer",label:"Bank Transfer",   sub:"Online",      svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#0ea5e9"/><text x="20" y="25" text-anchor="middle" font-size="20" fill="#fff" font-family="sans-serif">🏦</text></svg>` },
+  { value:"Cash",         label:"Cash",            sub:"Physical",    svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#059669"/><text x="20" y="25" text-anchor="middle" font-size="20" fill="#fff" font-family="sans-serif">💵</text></svg>` },
+];
+
 const BRAND_SVGS = {
   youtube: `<svg viewBox="0 0 24 24" width="SIZE" height="SIZE"><path fill="#FF0000" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8z"/><path fill="#fff" d="M9.6 15.6V8.4l6.2 3.6-6.2 3.6z"/></svg>`,
   claude:  `<svg viewBox="0 0 24 24" width="SIZE" height="SIZE"><rect width="24" height="24" rx="6" fill="#D4B896"/><text x="12" y="17" text-anchor="middle" font-size="13" font-weight="700" fill="#1a1a1a" font-family="serif">C</text></svg>`,
@@ -1630,6 +1572,29 @@ function renderBills() {
     return`${divider}<div style="background:${cardBg};border:1px solid ${cardBorder};border-radius:12px;padding:14px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px"><div style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center">${iconHtml(def.icon,24)}</div><div><div style="font-size:13px;font-weight:600;color:var(--text1)">${def.label}</div><div style="font-size:10px;color:var(--text4);margin-top:1px;font-family:'DM Mono',monospace">${dueDayLabel(def)}</div></div></div><div style="display:flex;align-items:flex-start;gap:8px"><div style="text-align:right"><div style="font-size:14px;font-weight:800;font-family:'DM Mono',monospace;color:var(--text1)">${displayAmt!=null?fmtMYR(displayAmt):"Variable"}</div><span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:99px;background:${statusColor}22;color:${statusColor};letter-spacing:0.5px;text-transform:uppercase">${statusLabel}</span></div>${def.custom?`<button onclick="deleteBill('${def.id}')" style="background:var(--red2);border:none;border-radius:6px;color:var(--red);font-size:11px;font-weight:700;padding:3px 7px;cursor:pointer;margin-top:2px">✕</button>`:''}
 </div></div>${innerContent}</div>`;
   }).join("");
+}
+
+function togglePaid(id) {
+  const def=BILL_DEFS.find(d=>d.id===id), st=getBillState(id), nowPaid=!st.paid;
+  saveBillState(id,{paid:nowPaid});
+  if(nowPaid&&!def.auto){
+    const amt=parseFloat(st.amount)||def.amount;
+    if(amt&&amt>0){
+      const logDate=isCurrentBillsMonth()?new Date().toISOString().split("T")[0]:new Date(billsViewYear,billsViewMonth+1,0).toISOString().split("T")[0];
+      expenses.push({id:Date.now(),amount:amt,cat:"Bills",payment:st.payment||"",note:def.label+(st.note?" — "+st.note:""),date:logDate,fromBill:true});
+      save("dev_expenses",expenses);
+    }
+  }
+  if(!nowPaid){
+    expenses=expenses.filter(e=>{
+      if(!e.fromBill) return true;
+      const d=new Date(e.date);
+      return!(d.getMonth()===billsViewMonth&&d.getFullYear()===billsViewYear&&e.note&&e.note.startsWith(def.label));
+    });
+    save("dev_expenses",expenses);
+  }
+  renderBills(); renderOverview();
+  toast(nowPaid?"✓ Paid & logged":"Marked unpaid");
 }
 
 function toggleBillAuto(id) {
@@ -1692,17 +1657,6 @@ function deleteBill(id) {
 // ══════════════════════════════════════════════════════════════════════
 // 14. PAYMENT PICKER
 // ══════════════════════════════════════════════════════════════════════
-const PAYMENT_METHODS = [
-  { value:"CC UOB",       label:"UOB PRVI Miles",  sub:"Credit Card", svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#003087"/><text x="20" y="26" text-anchor="middle" font-size="13" font-weight="900" fill="#fff" font-family="sans-serif">UOB</text></svg>` },
-  { value:"CC CIMB",      label:"CIMB",            sub:"Credit Card", svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#C8102E"/><text x="20" y="27" text-anchor="middle" font-size="10" font-weight="900" fill="#fff" font-family="sans-serif">CIMB</text></svg>` },
-  { value:"QR Maybank",   label:"Maybank",         sub:"QR Pay",      svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#FFCC00"/><text x="20" y="27" text-anchor="middle" font-size="8" font-weight="900" fill="#1a1a1a" font-family="sans-serif">Maybank</text></svg>` },
-  { value:"QR Ambank",    label:"AmBank",          sub:"QR Pay",      svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#E4002B"/><text x="20" y="27" text-anchor="middle" font-size="8" font-weight="900" fill="#fff" font-family="sans-serif">AmBank</text></svg>` },
-  { value:"QR CIMB",      label:"CIMB",            sub:"QR Pay",      svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#C8102E"/><text x="20" y="27" text-anchor="middle" font-size="10" font-weight="900" fill="#fff" font-family="sans-serif">CIMB</text></svg>` },
-  { value:"TnG",          label:"Touch & Go",      sub:"eWallet",     svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#00A0E3"/><text x="20" y="24" text-anchor="middle" font-size="11" font-weight="900" fill="#fff" font-family="sans-serif">TnG</text></svg>` },
-  { value:"Debit Card",   label:"Debit Card",      sub:"Any bank",    svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#64748b"/><rect x="6" y="13" width="28" height="18" rx="3" fill="none" stroke="#fff" stroke-width="2"/><rect x="6" y="19" width="28" height="5" fill="#fff" opacity="0.4"/></svg>` },
-  { value:"Bank Transfer",label:"Bank Transfer",   sub:"Online",      svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#0ea5e9"/><text x="20" y="25" text-anchor="middle" font-size="20" fill="#fff" font-family="sans-serif">🏦</text></svg>` },
-  { value:"Cash",         label:"Cash",            sub:"Physical",    svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#059669"/><text x="20" y="25" text-anchor="middle" font-size="20" fill="#fff" font-family="sans-serif">💵</text></svg>` },
-];
 let _pickerTarget=null;
 function openPaymentPicker(target) {
   _pickerTarget=target;
@@ -2006,14 +1960,17 @@ async function generatePDFReport() {
     const def = BILL_DEFS.find(d => d.id === id);
     if (def) def.auto = val;
   });
+  // Always sync bills and render regardless of setup state
+  syncBillAmounts();
   if(!isSetupDone()) {
     showSetup();
+    renderBills(); // still render bills even if setup not done
   } else {
     document.getElementById("setup-screen").style.display="none";
     document.getElementById("app-shell").style.display="block";
-    syncBillAmounts();
     renderOverview();
     renderCommitments();
+    renderBills();
     fetchLiveRate();
   }
 })();
