@@ -14,223 +14,119 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
   :root {
-    --bg:       #f0f4ff;
-    --surface:  #ffffff;
-    --surface2: #f8faff;
-    --border:   #e2e8f0;
-    --border2:  #cbd5e1;
-    --text1:    #0f172a;
-    --text2:    #334155;
-    --text3:    #64748b;
-    --text4:    #94a3b8;
-    --indigo:   #4f46e5;
-    --indigo2:  #6366f1;
-    --indigo3:  #e0e7ff;
-    --green:    #059669;
-    --green2:   #d1fae5;
-    --amber:    #d97706;
-    --amber2:   #fef3c7;
-    --red:      #dc2626;
-    --red2:     #fee2e2;
-    --purple:   #7c3aed;
-    --purple2:  #ede9fe;
-    --nav-h:    64px;
-    --safe-bot: env(safe-area-inset-bottom, 0px);
+    --bg:#f0f4ff;--surface:#ffffff;--surface2:#f8faff;--border:#e2e8f0;--border2:#cbd5e1;
+    --text1:#0f172a;--text2:#334155;--text3:#64748b;--text4:#94a3b8;
+    --indigo:#4f46e5;--indigo2:#6366f1;--indigo3:#e0e7ff;
+    --green:#059669;--green2:#d1fae5;--amber:#d97706;--amber2:#fef3c7;
+    --red:#dc2626;--red2:#fee2e2;--purple:#7c3aed;--purple2:#ede9fe;
+    --nav-h:64px;--safe-bot:env(safe-area-inset-bottom,0px);
   }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { height: 100%; background: var(--bg); color: var(--text1); font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
-  body { padding-bottom: calc(var(--nav-h) + var(--safe-bot)); }
-
-  /* ── NAV ── */
-  nav { position: fixed; bottom: 0; left: 0; right: 0; height: calc(var(--nav-h) + var(--safe-bot)); background: rgba(255,255,255,0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; align-items: flex-start; padding-top: 10px; z-index: 100; }
-  .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; background: none; border: none; cursor: pointer; padding: 2px 0; }
-  .nav-icon { font-size: 22px; line-height: 1; }
-  .nav-label { font-size: 8px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text4); transition: color 0.15s; }
-  .nav-btn.active .nav-label { color: var(--indigo); }
-  .nav-btn.active .nav-icon { filter: none; }
-  .nav-dot { width: 4px; height: 4px; border-radius: 99px; background: var(--indigo); opacity: 0; transition: opacity 0.15s; margin-top: 2px; }
-  .nav-btn.active .nav-dot { opacity: 1; }
-
-  /* ── LAYOUT ── */
-  .screen { display: none; padding: 0 0 24px; max-width: 480px; margin: 0 auto; }
-  .screen.active { display: block; }
-  .page-header { padding: 56px 20px 16px; background: linear-gradient(180deg, #e8eeff 0%, var(--bg) 100%); border-bottom: 1px solid var(--border); }
-  .page-header-flex { display:flex; justify-content:space-between; align-items:flex-start; }
-  .page-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--indigo2); margin-bottom: 4px; }
-  .page-title { font-size: 26px; font-weight: 800; color: var(--text1); letter-spacing: -0.5px; }
-  .page-sub { font-size: 12px; color: var(--text3); margin-top: 4px; font-family: 'DM Mono', monospace; }
-
-  .pad { padding: 16px 16px 0; }
-
-  /* ── CARDS ── */
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 12px; }
-  .card-sm { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
-  .card-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-  .card-grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-  .label-xs { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--text4); margin-bottom: 4px; }
-  .value-lg { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; color: var(--text1); }
-  .value-md { font-size: 16px; font-weight: 700; color: var(--text1); }
-  .value-sm { font-size: 13px; font-weight: 600; }
-  .hint { font-size: 11px; color: var(--text4); margin-top: 3px; font-family: 'DM Mono', monospace; }
-  .section-title { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); margin: 20px 0 10px; }
-
-  /* ── BADGES ── */
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 10px; font-weight: 700; }
-  .badge-green  { background: var(--green2);  color: var(--green); }
-  .badge-amber  { background: var(--amber2);  color: var(--amber); }
-  .badge-red    { background: var(--red2);    color: var(--red); }
-  .badge-indigo { background: var(--indigo3); color: var(--indigo); }
-  .badge-purple { background: var(--purple2); color: var(--purple); }
-
-  /* ── DIRECTIVE ── */
-  .directive { border-radius: 14px; padding: 16px; margin-bottom: 12px; border-left: 4px solid; }
-  .directive.green { background: var(--green2);  border-color: var(--green);  }
-  .directive.amber { background: var(--amber2);  border-color: var(--amber);  }
-  .directive.red   { background: var(--red2);    border-color: var(--red);    }
-  .directive-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; }
-  .directive.green .directive-label { color: var(--green); }
-  .directive.amber .directive-label { color: var(--amber); }
-  .directive.red   .directive-label { color: var(--red);   }
-  .directive-text  { font-size: 13px; line-height: 1.65; color: var(--text2); }
-
-  /* ── PROGRESS BAR ── */
-  .progress-track { background: var(--border); border-radius: 99px; height: 8px; overflow: hidden; }
-  .progress-fill  { height: 100%; border-radius: 99px; transition: width 0.6s ease; }
-
-  /* ── UTILITY INPUT ── */
-  .util-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
-  .util-icon { font-size: 20px; width: 28px; text-align: center; }
-  .util-label { flex: 1; font-size: 13px; color: var(--text2); font-weight: 500; }
-  .util-input-wrap { position: relative; }
-  .util-prefix { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; }
-  .util-input { width: 90px; padding: 7px 8px 7px 26px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-family: 'DM Mono', monospace; color: var(--text1); outline: none; }
-  .util-input:focus { border-color: var(--indigo2); }
-
-  /* ── QUICK LOG BUTTONS ── */
-  .qlog-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 8px; }
-  .qlog-btn  { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 4px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; transition: all 0.12s; -webkit-tap-highlight-color: transparent; }
-  .qlog-btn:active, .qlog-btn.sel { background: var(--indigo3); border-color: var(--indigo2); }
-  .qlog-icon  { font-size: 22px; }
-  .qlog-label { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; color: var(--text3); }
-
-  /* ── ADD FORM ── */
-  .add-form { background: var(--surface); border: 1.5px solid var(--indigo2); border-radius: 14px; padding: 16px; margin-bottom: 12px; }
-  .add-form-title { font-size: 11px; font-weight: 700; color: var(--indigo); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
-  .field { margin-bottom: 10px; }
-  .field label { font-size: 10px; font-weight: 600; color: var(--text3); letter-spacing: 0.5px; text-transform: uppercase; display: block; margin-bottom: 4px; }
-  .field input, .field select { width: 100%; padding: 10px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; font-size: 14px; color: var(--text1); outline: none; font-family: 'Inter', sans-serif; }
-  .field input:focus, .field select:focus { border-color: var(--indigo2); background: #fff; }
-  .amt-input { font-size: 20px !important; font-weight: 700 !important; font-family: 'DM Mono', monospace !important; }
-  .btn-row { display: flex; gap: 8px; }
-  .btn-primary { flex: 1; padding: 12px; background: var(--indigo); border: none; border-radius: 10px; color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; letter-spacing: 0.3px; -webkit-tap-highlight-color: transparent; }
-  .btn-secondary { flex: 1; padding: 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; color: var(--text3); font-size: 14px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-
-  /* ── EXPENSE LIST ── */
-  .exp-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 11px 0; border-bottom: 1px solid var(--border); }
-  .exp-cat { font-size: 13px; font-weight: 500; color: var(--text1); }
-  .exp-note { font-size: 11px; color: var(--text3); margin-top: 1px; font-family: 'DM Mono', monospace; }
-  .exp-amount { font-size: 14px; font-weight: 700; color: var(--red); font-family: 'DM Mono', monospace; }
-  .del-btn { background: none; border: none; color: var(--text4); font-size: 18px; cursor: pointer; padding: 0 0 0 8px; line-height: 1; }
-
-  /* ── COMMITMENT ROW ── */
-  .commit-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
-  .commit-label { font-size: 13px; color: var(--text2); font-weight: 500; }
-  .commit-right { display: flex; align-items: center; gap: 8px; }
-  .commit-val { font-size: 13px; font-weight: 700; font-family: 'DM Mono', monospace; color: var(--text1); min-width: 80px; text-align: right; }
-  .commit-edit { display: none; width: 90px; padding: 5px 8px; background: var(--surface2); border: 1px solid var(--indigo2); border-radius: 6px; font-size: 13px; font-family: 'DM Mono', monospace; outline: none; }
-  .commit-edit-btn { background: none; border: none; font-size: 14px; cursor: pointer; padding: 2px 4px; color: var(--text3); }
-
-  /* ── BAR SPARKLINE ── */
-  .cat-bar-row { margin-bottom: 12px; }
-  .cat-bar-top { display: flex; justify-content: space-between; margin-bottom: 4px; }
-  .cat-bar-name { font-size: 12px; font-weight: 500; color: var(--text2); }
-  .cat-bar-amt  { font-size: 12px; font-weight: 700; font-family: 'DM Mono', monospace; color: var(--text1); }
-
-  /* ── GOAL MILESTONE ── */
-  .milestone { border-radius: 12px; padding: 14px; margin-bottom: 10px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--surface); }
-  .milestone-goal { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
-  .milestone-eta  { font-size: 11px; color: var(--text3); margin-top: 2px; font-family: 'DM Mono', monospace; }
-  .milestone-req  { text-align: right; }
-  .milestone-req-label { font-size: 9px; color: var(--text4); text-transform: uppercase; letter-spacing: 1px; }
-  .milestone-req-val   { font-size: 13px; font-weight: 700; font-family: 'DM Mono', monospace; margin-top: 2px; }
-
-  /* ── INSIGHT CARD ── */
-  .insight { border-radius: 12px; padding: 14px; margin-bottom: 10px; border-left: 3px solid; }
-  .insight.warn   { background: var(--amber2); border-color: var(--amber); }
-  .insight.cut    { background: var(--red2);   border-color: var(--red);   }
-  .insight.invest { background: var(--green2); border-color: var(--green); }
-  .insight.gap    { background: var(--indigo3);border-color: var(--indigo);}
-  .insight-label  { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 5px; }
-  .insight.warn   .insight-label { color: var(--amber); }
-  .insight.cut    .insight-label { color: var(--red); }
-  .insight.invest .insight-label { color: var(--green); }
-  .insight.gap    .insight-label { color: var(--indigo); }
-  .insight-text   { font-size: 12px; line-height: 1.7; color: var(--text2); }
-
-  /* ── HEALTH SCORE ── */
-  .health-row { margin-bottom: 14px; }
-  .health-top { display: flex; justify-content: space-between; margin-bottom: 5px; }
-  .health-label { font-size: 12px; font-weight: 500; color: var(--text2); }
-  .health-score { font-size: 12px; font-weight: 800; font-family: 'DM Mono', monospace; }
-  .health-note  { font-size: 10px; color: var(--text4); margin-top: 3px; }
-
-  /* ── WHAT IF SLIDER ── */
-  .slider-wrap { margin: 12px 0; }
-  .slider-row  { display: flex; align-items: center; gap: 10px; }
-  input[type=range] { flex: 1; accent-color: var(--indigo); height: 4px; cursor: pointer; }
-  .slider-val  { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 700; color: var(--indigo); min-width: 80px; text-align: right; }
-  .whatif-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
-  .whatif-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
-  .whatif-label { font-size: 9px; color: var(--text4); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
-  .whatif-val   { font-size: 15px; font-weight: 800; font-family: 'DM Mono', monospace; }
-
-  /* ── WEALTH ROW ── */
-  .wealth-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid var(--border); }
-  .wealth-label { font-size: 13px; font-weight: 500; color: var(--text2); }
-  .wealth-note  { font-size: 10px; color: var(--text4); margin-top: 2px; font-family: 'DM Mono', monospace; }
-  .wealth-val   { font-size: 14px; font-weight: 700; font-family: 'DM Mono', monospace; }
-
-  /* ── MONTH SELECTOR ── */
-  .month-sel { display: flex; gap: 8px; margin-bottom: 16px; }
-  .month-sel select { flex: 1; padding: 9px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; font-size: 13px; color: var(--text1); outline: none; }
-
-  /* ── CANVAS CHART CONTAINERS ── */
-  .chart-box { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 12px; }
-  .chart-title { font-size: 11px; font-weight: 700; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
-
-  /* ── TOAST ── */
-  .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-80px); background: var(--text1); color: #fff; padding: 10px 20px; border-radius: 99px; font-size: 13px; font-weight: 500; z-index: 999; transition: transform 0.3s ease; pointer-events: none; white-space: nowrap; }
-  .toast.show { transform: translateX(-50%) translateY(0); }
-
-  canvas { display: block; }
-  .subtab-btn { flex:1; padding:7px 4px; background:none; border:none; border-radius:7px; font-size:11px; font-weight:600; color:var(--text3); cursor:pointer; transition:all 0.12s; -webkit-tap-highlight-color:transparent; }
-  .subtab-btn.active { background:var(--indigo); color:#fff; }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;background:var(--bg);color:var(--text1);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+  body{padding-bottom:calc(var(--nav-h) + var(--safe-bot));}
+  nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav-h) + var(--safe-bot));background:rgba(255,255,255,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;align-items:flex-start;padding-top:10px;z-index:100;}
+  .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;padding:2px 0;}
+  .nav-icon{font-size:22px;line-height:1;}
+  .nav-label{font-size:8px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;color:var(--text4);transition:color 0.15s;}
+  .nav-btn.active .nav-label{color:var(--indigo);}
+  .nav-dot{width:4px;height:4px;border-radius:99px;background:var(--indigo);opacity:0;transition:opacity 0.15s;margin-top:2px;}
+  .nav-btn.active .nav-dot{opacity:1;}
+  .screen{display:none;padding:0 0 24px;max-width:480px;margin:0 auto;}
+  .screen.active{display:block;}
+  .page-header{padding:56px 20px 16px;background:linear-gradient(180deg,#e8eeff 0%,var(--bg) 100%);border-bottom:1px solid var(--border);}
+  .page-header-flex{display:flex;justify-content:space-between;align-items:flex-start;}
+  .page-eyebrow{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--indigo2);margin-bottom:4px;}
+  .page-title{font-size:26px;font-weight:800;color:var(--text1);letter-spacing:-0.5px;}
+  .page-sub{font-size:12px;color:var(--text3);margin-top:4px;font-family:'DM Mono',monospace;}
+  .pad{padding:16px 16px 0;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;}
+  .card-sm{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .card-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+  .label-xs{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text4);margin-bottom:4px;}
+  .value-md{font-size:16px;font-weight:700;color:var(--text1);}
+  .hint{font-size:11px;color:var(--text4);margin-top:3px;font-family:'DM Mono',monospace;}
+  .section-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin:20px 0 10px;}
+  .badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;}
+  .badge-green{background:var(--green2);color:var(--green);}
+  .badge-amber{background:var(--amber2);color:var(--amber);}
+  .badge-red{background:var(--red2);color:var(--red);}
+  .badge-indigo{background:var(--indigo3);color:var(--indigo);}
+  .directive{border-radius:14px;padding:16px;margin-bottom:12px;border-left:4px solid;}
+  .directive.green{background:var(--green2);border-color:var(--green);}
+  .directive.amber{background:var(--amber2);border-color:var(--amber);}
+  .directive.red{background:var(--red2);border-color:var(--red);}
+  .directive-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;}
+  .directive.green .directive-label{color:var(--green);}
+  .directive.amber .directive-label{color:var(--amber);}
+  .directive.red .directive-label{color:var(--red);}
+  .directive-text{font-size:13px;line-height:1.65;color:var(--text2);}
+  .progress-track{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+  .progress-fill{height:100%;border-radius:99px;transition:width 0.6s ease;}
+  .qlog-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px;}
+  .qlog-btn{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;transition:all 0.12s;-webkit-tap-highlight-color:transparent;}
+  .qlog-btn:active,.qlog-btn.sel{background:var(--indigo3);border-color:var(--indigo2);}
+  .qlog-icon{font-size:22px;}
+  .qlog-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;color:var(--text3);}
+  .add-form{background:var(--surface);border:1.5px solid var(--indigo2);border-radius:14px;padding:16px;margin-bottom:12px;}
+  .add-form-title{font-size:11px;font-weight:700;color:var(--indigo);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
+  .field{margin-bottom:10px;}
+  .field label{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:0.5px;text-transform:uppercase;display:block;margin-bottom:4px;}
+  .field input,.field select{width:100%;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:14px;color:var(--text1);outline:none;font-family:'Inter',sans-serif;}
+  .field input:focus,.field select:focus{border-color:var(--indigo2);background:#fff;}
+  .amt-input{font-size:20px!important;font-weight:700!important;font-family:'DM Mono',monospace!important;}
+  .btn-row{display:flex;gap:8px;}
+  .btn-primary{flex:1;padding:12px;background:var(--indigo);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;}
+  .btn-secondary{flex:1;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text3);font-size:14px;cursor:pointer;}
+  .exp-item{display:flex;justify-content:space-between;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--border);}
+  .exp-cat{font-size:13px;font-weight:500;color:var(--text1);}
+  .exp-note{font-size:11px;color:var(--text3);margin-top:1px;font-family:'DM Mono',monospace;}
+  .exp-amount{font-size:14px;font-weight:700;color:var(--red);font-family:'DM Mono',monospace;}
+  .del-btn{background:none;border:none;color:var(--text4);font-size:18px;cursor:pointer;padding:0 0 0 8px;}
+  .commit-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);}
+  .commit-label{font-size:13px;color:var(--text2);font-weight:500;}
+  .commit-right{display:flex;align-items:center;gap:8px;}
+  .commit-val{font-size:13px;font-weight:700;font-family:'DM Mono',monospace;color:var(--text1);min-width:80px;text-align:right;}
+  .commit-edit{display:none;width:90px;padding:5px 8px;background:var(--surface2);border:1px solid var(--indigo2);border-radius:6px;font-size:13px;font-family:'DM Mono',monospace;outline:none;}
+  .commit-edit-btn{background:none;border:none;font-size:14px;cursor:pointer;padding:2px 4px;color:var(--text3);}
+  .milestone{border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--surface);}
+  .milestone-goal{font-size:18px;font-weight:800;letter-spacing:-0.5px;}
+  .milestone-eta{font-size:11px;color:var(--text3);margin-top:2px;font-family:'DM Mono',monospace;}
+  .milestone-req{text-align:right;}
+  .milestone-req-label{font-size:9px;color:var(--text4);text-transform:uppercase;letter-spacing:1px;}
+  .milestone-req-val{font-size:13px;font-weight:700;font-family:'DM Mono',monospace;margin-top:2px;}
+  .wealth-row{display:flex;justify-content:space-between;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--border);}
+  .wealth-label{font-size:13px;font-weight:500;color:var(--text2);}
+  .wealth-note{font-size:10px;color:var(--text4);margin-top:2px;font-family:'DM Mono',monospace;}
+  .wealth-val{font-size:14px;font-weight:700;font-family:'DM Mono',monospace;}
+  .month-sel{display:flex;gap:8px;margin-bottom:16px;}
+  .month-sel select{flex:1;padding:9px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:13px;color:var(--text1);outline:none;}
+  .chart-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;}
+  .chart-title{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
+  .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:var(--text1);color:#fff;padding:10px 20px;border-radius:99px;font-size:13px;font-weight:500;z-index:999;transition:transform 0.3s ease;pointer-events:none;white-space:nowrap;}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  .subtab-btn{flex:1;padding:7px 4px;background:none;border:none;border-radius:7px;font-size:11px;font-weight:600;color:var(--text3);cursor:pointer;transition:all 0.12s;}
+  .subtab-btn.active{background:var(--indigo);color:#fff;}
+  canvas{display:block;}
 </style>
 </head>
 <body>
-
-
-<!-- ═══════════════════════ SETUP SCREEN ═══════════════════════ -->
 <div id="setup-screen" style="display:none;min-height:100vh;background:var(--bg);padding:0 0 40px">
   <div style="background:linear-gradient(135deg,#4f46e5,#7c3aed);padding:56px 24px 32px">
     <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.6);margin-bottom:6px">Welcome to</div>
     <div style="font-size:28px;font-weight:800;color:#fff;letter-spacing:-0.5px">DevFinance OS</div>
-    <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:6px">Set up your profile to get started. Your data stays on this device only.</div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:6px">Your data stays on this device only.</div>
   </div>
   <div style="padding:24px 16px;max-width:480px;margin:0 auto">
-
     <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin:0 0 12px">Income</div>
     <div class="card" style="margin-bottom:20px">
       <div class="field"><label>SGD Monthly Salary</label><input type="number" id="setup-salary" placeholder="e.g. 8000" inputmode="decimal"/></div>
       <div class="field"><label>MYR Airbnb / Other Income</label><input type="number" id="setup-airbnb" placeholder="e.g. 200" inputmode="decimal"/></div>
     </div>
-
     <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin:0 0 12px">Investment</div>
     <div class="card" style="margin-bottom:20px">
       <div class="field"><label>Monthly VOO Investment (MYR)</label><input type="number" id="setup-voo" placeholder="e.g. 2000" inputmode="decimal"/></div>
       <div class="field"><label>Current Portfolio Value (MYR)</label><input type="number" id="setup-port" placeholder="e.g. 26000" inputmode="decimal"/></div>
     </div>
-
     <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin:0 0 12px">Goals</div>
     <div class="card" style="margin-bottom:20px">
       <div class="field"><label>Goal 1 (MYR)</label><input type="number" id="setup-goal1" value="1000000" inputmode="decimal"/></div>
@@ -238,165 +134,94 @@
       <div class="field"><label>Goal 3 (MYR)</label><input type="number" id="setup-goal3" value="5000000" inputmode="decimal"/></div>
       <div class="field"><label>Investment Horizon (years)</label><input type="number" id="setup-years" value="20" inputmode="decimal"/></div>
     </div>
-
     <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin:0 0 12px">Wealth Snapshot</div>
     <div class="card" style="margin-bottom:20px">
       <div class="field"><label>SGD Savings (MYR equivalent)</label><input type="number" id="setup-sgdsav" placeholder="e.g. 119700" inputmode="decimal"/></div>
       <div class="field"><label>Moomoo Portfolio (MYR)</label><input type="number" id="setup-moomoo" placeholder="e.g. 22093" inputmode="decimal"/></div>
       <div class="field"><label>Moomoo Cash (MYR)</label><input type="number" id="setup-cash" placeholder="e.g. 4069" inputmode="decimal"/></div>
     </div>
-
     <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin:0 0 12px">Properties</div>
     <div class="card" style="margin-bottom:20px">
       <div style="font-size:11px;font-weight:600;color:var(--indigo);margin-bottom:10px">🏗️ Dato Onn (Primary Residence)</div>
-      <div class="field"><label>Current Valuation (MYR) — update anytime</label><input type="number" id="setup-datoOnnVal" placeholder="e.g. 1700000" inputmode="decimal"/></div>
+      <div class="field"><label>Current Valuation (MYR)</label><input type="number" id="setup-datoOnnVal" placeholder="e.g. 1700000" inputmode="decimal"/></div>
       <div style="font-size:10px;color:var(--text4);margin-top:-4px;margin-bottom:10px;font-family:'DM Mono',monospace">Purchase: RM 1,687,800 · Loan: RM 1,557,357</div>
       <div style="font-size:11px;font-weight:600;color:var(--indigo);margin-bottom:10px">🏠 Ipoh (Airbnb Investment)</div>
-      <div class="field"><label>Current Valuation (MYR) — update anytime</label><input type="number" id="setup-ipohVal" placeholder="e.g. 450000" inputmode="decimal"/></div>
-      <div style="font-size:10px;color:var(--text4);margin-top:-4px;font-family:'DM Mono',monospace">Loan outstanding: RM 418,063 · Monthly: RM 1,919</div>
+      <div class="field"><label>Current Valuation (MYR)</label><input type="number" id="setup-ipohVal" placeholder="e.g. 450000" inputmode="decimal"/></div>
+      <div style="font-size:10px;color:var(--text4);margin-top:-4px;font-family:'DM Mono',monospace">Loan: RM 418,063 · Monthly: RM 1,919</div>
     </div>
-
     <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin:0 0 12px">Renovation Fund</div>
     <div class="card" style="margin-bottom:20px">
       <div class="field"><label>Renovation Target (MYR)</label><input type="number" id="setup-reno-goal" placeholder="e.g. 100000" inputmode="decimal"/></div>
       <div class="field"><label>Already Saved (MYR)</label><input type="number" id="setup-reno-saved" placeholder="e.g. 0" inputmode="decimal"/></div>
     </div>
-
     <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin:0 0 12px">Bills Tracker Start</div>
     <div class="card" style="margin-bottom:28px">
       <div class="field"><label>Start Month</label><select id="setup-startmonth"></select></div>
       <div class="field"><label>Start Year</label><input type="number" id="setup-startyear" value="2026" inputmode="numeric"/></div>
     </div>
-
-    <button onclick="saveSetup()" style="width:100%;padding:16px;background:var(--indigo);border:none;border-radius:14px;color:#fff;font-size:16px;font-weight:800;cursor:pointer;letter-spacing:0.3px;margin-bottom:12px">Save & Launch DevFinance →</button>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
-      <button onclick="exportData()" style="padding:12px;background:var(--green2);border:1px solid #6ee7b7;border-radius:10px;color:var(--green);font-size:13px;font-weight:700;cursor:pointer">📤 Export Data</button>
-      <label style="padding:12px;background:var(--indigo3);border:1px solid var(--indigo2);border-radius:10px;color:var(--indigo);font-size:13px;font-weight:700;cursor:pointer;text-align:center;display:block">
-        📥 Import Data
-        <input type="file" accept=".json" onchange="importData(event)" style="display:none"/>
-      </label>
-    </div>
-    <div style="font-size:10px;color:var(--text4);text-align:center;margin-bottom:12px">Export saves all your data as a backup JSON file. Import restores it.</div>
-
+    <button onclick="saveSetup()" style="width:100%;padding:16px;background:var(--indigo);border:none;border-radius:14px;color:#fff;font-size:16px;font-weight:800;cursor:pointer;margin-bottom:12px">Save & Launch DevFinance →</button>
     <button onclick="resetApp()" style="width:100%;padding:12px;background:none;border:1px solid var(--border);border-radius:10px;color:var(--text4);font-size:13px;cursor:pointer">Reset All Data</button>
   </div>
 </div>
 
-<!-- ═══════════════════════ APP SHELL ═══════════════════════ -->
 <div id="app-shell" style="display:none">
 <div id="toast" class="toast">Saved</div>
 
-<!-- ═══════════════════════ SCREEN 1: OVERVIEW ═══════════════════════ -->
 <div id="s-overview" class="screen active">
   <div class="page-header page-header-flex">
     <div>
       <div class="page-eyebrow">DevFinance OS</div>
-      <div class="page-title" id="ov-month-title">June 2026</div>
-      <div class="page-sub" id="ov-rate">SGD/MYR 3.15 · Updated today</div>
+      <div class="page-title" id="ov-month-title">Loading...</div>
+      <div class="page-sub" id="ov-rate">SGD/MYR 3.15</div>
     </div>
     <button onclick="showSetup()" style="background:var(--indigo3);border:1px solid var(--indigo2);border-radius:8px;color:var(--indigo);font-size:11px;font-weight:700;padding:6px 12px;cursor:pointer;white-space:nowrap;align-self:flex-start;margin-top:4px">✏️ Edit</button>
   </div>
   <div class="pad">
-
-    <!-- Directive -->
     <div id="ov-directive" class="directive green" style="margin-top:16px">
       <div class="directive-label">Monthly Directive</div>
       <div class="directive-text" id="ov-directive-text">Loading...</div>
     </div>
-
-    <!-- 4 summary cards -->
     <div class="card-grid2">
-      <div class="card-sm">
-        <div class="label-xs">Monthly Income</div>
-        <div class="value-md" id="ov-income">—</div>
-        <div class="hint">SGD 8k + Airbnb</div>
-      </div>
-      <div class="card-sm">
-        <div class="label-xs">Fixed Outflows</div>
-        <div class="value-md" style="color:var(--red)" id="ov-fixed">—</div>
-        <div class="hint" id="ov-fixed-hint">16 items</div>
-      </div>
-      <div class="card-sm">
-        <div class="label-xs">Utilities</div>
-        <div class="value-md" style="color:var(--amber)" id="ov-util">—</div>
-        <div class="hint">TNB + Water (from Bills)</div>
-      </div>
-      <div class="card-sm">
-        <div class="label-xs">Bills Cleared</div>
-        <div class="value-md" style="color:var(--indigo)" id="ov-bills-cleared">—</div>
-        <div class="hint" id="ov-bills-hint">this month</div>
-      </div>
+      <div class="card-sm"><div class="label-xs">Monthly Income</div><div class="value-md" id="ov-income">—</div><div class="hint">SGD + Airbnb</div></div>
+      <div class="card-sm"><div class="label-xs">Fixed Outflows</div><div class="value-md" style="color:var(--red)" id="ov-fixed">—</div><div class="hint" id="ov-fixed-hint">items</div></div>
+      <div class="card-sm"><div class="label-xs">Utilities</div><div class="value-md" style="color:var(--amber)" id="ov-util">—</div><div class="hint">TNB + Water</div></div>
+      <div class="card-sm"><div class="label-xs">Bills Cleared</div><div class="value-md" style="color:var(--indigo)" id="ov-bills-cleared">—</div><div class="hint" id="ov-bills-hint">this month</div></div>
     </div>
     <div class="card-grid2">
-      <div class="card-sm">
-        <div class="label-xs">Remaining</div>
-        <div class="value-md" style="color:var(--green)" id="ov-remain">—</div>
-        <div class="hint" id="ov-days-hint">days left</div>
-      </div>
-      <div class="card-sm">
-        <div class="label-xs">Discretionary</div>
-        <div class="value-md" style="color:var(--text1)" id="ov-disc">—</div>
-        <div class="hint">after fixed + utilities</div>
-      </div>
+      <div class="card-sm"><div class="label-xs">Remaining</div><div class="value-md" style="color:var(--green)" id="ov-remain">—</div><div class="hint" id="ov-days-hint">days left</div></div>
+      <div class="card-sm"><div class="label-xs">Discretionary</div><div class="value-md" id="ov-disc">—</div><div class="hint">after fixed + utilities</div></div>
     </div>
-
-    <!-- Burn bar -->
     <div class="card">
       <div style="display:flex;justify-content:space-between;margin-bottom:10px">
         <span style="font-size:12px;color:var(--text3);font-weight:600">Discretionary Burn</span>
         <span style="font-size:12px;font-weight:700;font-family:'DM Mono',monospace" id="ov-burn-label">—</span>
       </div>
-      <div class="progress-track">
-        <div class="progress-fill" id="ov-burn-fill" style="width:0%;background:var(--green)"></div>
-      </div>
+      <div class="progress-track"><div class="progress-fill" id="ov-burn-fill" style="width:0%;background:var(--green)"></div></div>
       <div style="display:flex;justify-content:space-between;margin-top:8px">
         <span style="font-size:11px;color:var(--text4)" id="ov-burn-pct">0% used</span>
-        <span style="font-size:11px;color:var(--text4)" id="ov-burn-left">— left</span>
+        <span style="font-size:11px;color:var(--text4)" id="ov-burn-left">—</span>
       </div>
     </div>
-
-    <!-- Renovation Fund -->
     <div class="card" style="margin-bottom:12px;border-left:3px solid var(--purple)">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
-        <div>
-          <div class="label-xs">🏚️ Renovation Fund</div>
-          <div class="value-md" style="color:var(--purple)" id="ov-reno-saved">—</div>
-          <div class="hint" id="ov-reno-hint">saved so far</div>
-        </div>
-        <div style="text-align:right">
-          <div class="label-xs">This Month</div>
-          <div style="font-size:14px;font-weight:700;color:var(--green)" id="ov-reno-monthly">—</div>
-          <div class="hint">from surplus</div>
-        </div>
+        <div><div class="label-xs">🏚️ Renovation Fund</div><div class="value-md" style="color:var(--purple)" id="ov-reno-saved">—</div><div class="hint" id="ov-reno-hint">saved so far</div></div>
+        <div style="text-align:right"><div class="label-xs">This Month</div><div style="font-size:14px;font-weight:700;color:var(--green)" id="ov-reno-monthly">—</div><div class="hint">from surplus</div></div>
       </div>
-      <div class="progress-track" style="margin-top:10px">
-        <div class="progress-fill" id="ov-reno-fill" style="width:0%;background:var(--purple)"></div>
-      </div>
+      <div class="progress-track" style="margin-top:10px"><div class="progress-fill" id="ov-reno-fill" style="width:0%;background:var(--purple)"></div></div>
       <div style="display:flex;justify-content:space-between;margin-top:6px">
         <span style="font-size:10px;color:var(--text4)" id="ov-reno-pct">0% of goal</span>
         <span style="font-size:10px;color:var(--text4)" id="ov-reno-goal">Goal: —</span>
       </div>
     </div>
-
-    <!-- Quick Log -->
     <div class="section-title">Quick Log</div>
     <div class="card" style="padding:14px">
       <div class="qlog-grid" id="qlog-grid1"></div>
       <div class="qlog-grid" id="qlog-grid2"></div>
     </div>
-
-    <!-- Add form (hidden by default) -->
     <div class="add-form" id="add-form" style="display:none">
       <div class="add-form-title" id="add-form-title">Log Expense</div>
-      <div class="field">
-        <label>Amount (MYR)</label>
-        <input class="amt-input" type="number" id="f-amount" placeholder="0.00" inputmode="decimal"/>
-      </div>
-      <div class="field">
-        <label>Category</label>
-        <select id="f-cat"></select>
-      </div>
+      <div class="field"><label>Amount (MYR)</label><input class="amt-input" type="number" id="f-amount" placeholder="0.00" inputmode="decimal"/></div>
+      <div class="field"><label>Category</label><select id="f-cat"></select></div>
       <div class="field">
         <label>Payment Method</label>
         <input type="hidden" id="f-payment" value=""/>
@@ -404,175 +229,108 @@
           <span id="f-payment-display">— Select payment method —</span>
         </button>
       </div>
-      <div class="field">
-        <label>Note (optional)</label>
-        <input type="text" id="f-note" placeholder="e.g. Petronas, AEON"/>
-      </div>
-      <div class="field">
-        <label>Date</label>
-        <input type="date" id="f-date"/>
-      </div>
+      <div class="field"><label>Note (optional)</label><input type="text" id="f-note" placeholder="e.g. Petronas, AEON"/></div>
+      <div class="field"><label>Date</label><input type="date" id="f-date"/></div>
       <div class="btn-row">
         <button class="btn-primary" onclick="saveExpense()">Save</button>
         <button class="btn-secondary" onclick="hideForm()">Cancel</button>
       </div>
     </div>
-
   </div>
 </div>
 
-<!-- ═══════════════════════ SCREEN 3: COMMITMENTS ═══════════════════════ -->
-<div id="s-commitments" class="screen">
-  <div class="page-header">
-    <div class="page-eyebrow">Fixed Outflows</div>
-    <div class="page-title">Commitments</div>
-    <div class="page-sub">Tap any amount to edit</div>
+<div id="s-expenses" class="screen">
+  <div class="page-header"><div class="page-eyebrow">Tracker</div><div class="page-title">Expenses</div></div>
+  <div class="pad">
+    <div class="month-sel" style="margin-top:16px">
+      <select id="exp-month-sel" onchange="renderExpenses()"></select>
+      <select id="exp-year-sel" onchange="renderExpenses()">
+        <option value="2025">2025</option><option value="2026" selected>2026</option><option value="2027">2027</option>
+      </select>
+    </div>
+    <div class="card"><div class="label-xs" style="margin-bottom:12px">By Category</div><div id="exp-cat-list"></div></div>
+    <div class="chart-box"><div class="chart-title">Spend Distribution</div><canvas id="pie-chart" height="200"></canvas></div>
+    <div class="section-title">All Entries</div>
+    <div class="card"><div id="exp-list"><div style="color:var(--text4);font-size:13px;padding:16px 0;text-align:center">No expenses logged yet.</div></div></div>
   </div>
+</div>
+
+<div id="s-commitments" class="screen">
+  <div class="page-header"><div class="page-eyebrow">Fixed Outflows</div><div class="page-title">Commitments</div><div class="page-sub">Tap ✏️ to edit any amount</div></div>
   <div class="pad">
     <div class="card-grid2" style="margin-top:16px">
-      <div class="card-sm">
-        <div class="label-xs">Total Fixed</div>
-        <div class="value-md" style="color:var(--red)" id="cm-total">—</div>
-        <div class="hint">per month</div>
-      </div>
-      <div class="card-sm">
-        <div class="label-xs">% of Income</div>
-        <div class="value-md" style="color:var(--amber)" id="cm-pct">—</div>
-        <div class="hint">before discretionary</div>
-      </div>
+      <div class="card-sm"><div class="label-xs">Total Fixed</div><div class="value-md" style="color:var(--red)" id="cm-total">—</div><div class="hint">per month</div></div>
+      <div class="card-sm"><div class="label-xs">% of Income</div><div class="value-md" style="color:var(--amber)" id="cm-pct">—</div></div>
     </div>
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <div class="label-xs">Fixed Monthly — tap ✏️ to edit</div>
-        <button onclick="addNewBill()" style="background:var(--indigo3);border:1px solid var(--indigo2);border-radius:6px;color:var(--indigo);font-size:10px;font-weight:700;padding:4px 10px;cursor:pointer">+ Add</button>
-      </div>
-      <div id="commit-list"></div>
-    </div>
-    <div class="card" style="margin-top:0">
-      <div class="label-xs" style="margin-bottom:8px">VOO Investment</div>
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <span style="font-size:13px;color:var(--text2)">Vanguard S&P 500</span>
-        <span style="font-size:14px;font-weight:700;font-family:'DM Mono',monospace;color:var(--indigo)">RM 2,000</span>
-      </div>
+    <div class="card"><div class="label-xs" style="margin-bottom:10px">Fixed Monthly</div><div id="commit-list"></div></div>
+    <div class="card" style="margin-top:0"><div class="label-xs" style="margin-bottom:8px">VOO Investment</div>
+      <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:var(--text2)">Vanguard S&P 500</span><span style="font-size:14px;font-weight:700;font-family:'DM Mono',monospace;color:var(--indigo)">RM 2,000</span></div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════ SCREEN 4: WEALTH ═══════════════════════ -->
 <div id="s-wealth" class="screen">
-  <div class="page-header">
-    <div class="page-eyebrow">Net Worth</div>
-    <div class="page-title">Wealth</div>
-    <div class="page-sub" id="wealth-total-label">Liquid: RM —</div>
-  </div>
+  <div class="page-header"><div class="page-eyebrow">Net Worth</div><div class="page-title">Wealth</div><div class="page-sub" id="wealth-total-label">—</div></div>
   <div class="pad">
     <div class="card" style="margin-top:16px;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none">
       <div class="label-xs" style="color:rgba(255,255,255,0.6)">Total Tracked Assets</div>
       <div style="font-size:32px;font-weight:800;color:#fff;letter-spacing:-1px;margin:6px 0 4px" id="wealth-liquid">—</div>
-      <div style="font-size:11px;color:rgba(255,255,255,0.5);font-family:'DM Mono',monospace">Excl. properties (fully leveraged, zero equity yet)</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.5);font-family:'DM Mono',monospace">Excl. properties (fully leveraged)</div>
     </div>
-
     <div class="section-title">Assets</div>
     <div class="card" id="wealth-assets"></div>
-
     <div class="section-title">Investment Portfolio</div>
     <div class="card" id="wealth-investments"></div>
-
     <div class="card" style="background:var(--amber2);border-color:var(--amber)">
       <div class="label-xs" style="color:var(--amber);margin-bottom:6px">⚠ Action Required</div>
-      <div style="font-size:12px;color:var(--text2);line-height:1.7">SGD savings earning near-zero interest? <strong>DBS Multiplier Account</strong> pays up to 4.1% p.a. with no lock-in — just credit your salary and transact in one eligible category (insurance, investments, or home loan). You likely already qualify. Open via DBS digibank app in 10 minutes.</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.7"><strong>DBS Multiplier Account</strong> pays up to 4.1% p.a. with no lock-in. Open via DBS digibank app.</div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════ SCREEN 5: ANALYZER ═══════════════════════ -->
 <div id="s-analyzer" class="screen">
-  <div class="page-header">
-    <div class="page-eyebrow">Intelligence</div>
-    <div class="page-title">Analyzer</div>
-    <div class="page-sub">Goal: RM 1M → RM 3–5M by age 51</div>
-  </div>
+  <div class="page-header"><div class="page-eyebrow">Intelligence</div><div class="page-title">Analyzer</div><div class="page-sub" id="an-goal-sub">Goal: RM 1M → RM 3–5M</div></div>
   <div class="pad">
-
-    <!-- Sub-tabs -->
     <div style="display:flex;gap:6px;margin:16px 0 12px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:4px">
       <button class="subtab-btn active" onclick="setSubtab('projection')" id="st-projection">📈 Projection</button>
       <button class="subtab-btn" onclick="setSubtab('spending')" id="st-spending">💸 Spending</button>
       <button class="subtab-btn" onclick="setSubtab('insights')" id="st-insights">🧠 Insights</button>
     </div>
-
-    <!-- PROJECTION -->
     <div id="sub-projection">
-      <div class="section-title">Goal Milestones @ RM 2,000/month</div>
+      <div class="section-title">Goal Milestones</div>
       <div id="milestone-list"></div>
-
       <div class="card" style="background:linear-gradient(135deg,#ecfdf5,#d1fae5);border-color:var(--green)">
-        <div class="label-xs" style="color:var(--green)">20-Year Projection @ RM 2,000/month</div>
-        <div style="font-size:28px;font-weight:800;letter-spacing:-0.5px;color:var(--green);margin:6px 0 4px" id="proj-final">—</div>
+        <div class="label-xs" style="color:var(--green)">20-Year Projection</div>
+        <div style="color:var(--green);margin:6px 0 4px" id="proj-final">—</div>
         <div class="hint" style="color:var(--green)">Assumes 10% p.a. (VOO historical avg)</div>
       </div>
-
-      <div class="chart-box">
-        <div class="chart-title">Portfolio Growth Curve</div>
-        <canvas id="proj-chart" height="200"></canvas>
-      </div>
-
-      <!-- What-if -->
+      <div class="chart-box"><div class="chart-title">Portfolio Growth Curve</div><canvas id="proj-chart" height="200"></canvas></div>
       <div class="card" style="border-color:var(--indigo2)">
         <div class="label-xs" style="color:var(--indigo);margin-bottom:10px">What If I Invest More?</div>
-        <div class="slider-wrap">
-          <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-            <span style="font-size:12px;color:var(--text3)">Extra per month</span>
-            <span class="slider-val" id="slider-display">+RM 0</span>
-          </div>
-          <input type="range" min="0" max="5000" step="100" value="0" id="extra-slider" oninput="updateWhatIf(this.value)" style="width:100%"/>
-        </div>
-        <div class="whatif-grid" id="whatif-grid" style="display:none">
-          <div class="whatif-card">
-            <div class="whatif-label">Base (20yr)</div>
-            <div class="whatif-val" style="color:var(--indigo)" id="wi-base">—</div>
-          </div>
-          <div class="whatif-card">
-            <div class="whatif-label">Boosted (20yr)</div>
-            <div class="whatif-val" style="color:var(--green)" id="wi-boost">—</div>
-          </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:12px;color:var(--text3)">Extra per month</span><span style="font-family:'DM Mono',monospace;font-size:14px;font-weight:700;color:var(--indigo);min-width:80px;text-align:right" id="slider-display">+RM 0</span></div>
+        <input type="range" min="0" max="5000" step="100" value="0" id="extra-slider" oninput="updateWhatIf(this.value)" style="width:100%;accent-color:var(--indigo);"/>
+        <div style="display:none;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px" id="whatif-grid">
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px"><div style="font-size:9px;color:var(--text4);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Base (20yr)</div><div style="font-size:15px;font-weight:800;font-family:'DM Mono',monospace;color:var(--indigo)" id="wi-base">—</div></div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px"><div style="font-size:9px;color:var(--text4);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Boosted (20yr)</div><div style="font-size:15px;font-weight:800;font-family:'DM Mono',monospace;color:var(--green)" id="wi-boost">—</div></div>
         </div>
       </div>
-
-      <!-- Share button -->
-    <button onclick="generatePDFReport()" style="width:100%;padding:13px;background:var(--indigo);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px">
-      <span style="font-size:18px">📄</span> Generate Monthly PDF Report
-    </button>
-
-    <!-- Gap alert -->
+      <button onclick="generatePDFReport()" style="width:100%;padding:13px;background:var(--indigo);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-size:18px">📄</span> Generate Monthly PDF Report</button>
       <div class="card" style="background:var(--red2);border-color:var(--red)">
-        <div class="label-xs" style="color:var(--red);margin-bottom:6px">⚠ Gap to RM 3M Goal</div>
+        <div class="label-xs" style="color:var(--red);margin-bottom:6px">⚠ Gap to Goal</div>
         <div style="font-size:12px;color:var(--text2);line-height:1.75" id="gap-text">—</div>
       </div>
     </div>
-
-    <!-- SPENDING ANALYSIS -->
     <div id="sub-spending" style="display:none">
       <div class="month-sel">
         <select id="an-month-sel" onchange="renderAnalyzerSpending()"></select>
         <select id="an-year-sel" onchange="renderAnalyzerSpending()">
-          <option value="2025">2025</option>
-          <option value="2026" selected>2026</option>
-          <option value="2027">2027</option>
+          <option value="2025">2025</option><option value="2026" selected>2026</option><option value="2027">2027</option>
         </select>
       </div>
       <div class="card-grid2" id="an-summary"></div>
-      <div class="chart-box">
-        <div class="chart-title">6-Month Spend Trend</div>
-        <canvas id="trend-chart" height="180"></canvas>
-      </div>
-      <div class="card" id="an-cat-breakdown">
-        <div class="label-xs" style="margin-bottom:12px">Category Breakdown</div>
-        <div id="an-cat-list"></div>
-      </div>
+      <div class="chart-box"><div class="chart-title">6-Month Spend Trend</div><canvas id="trend-chart" height="180"></canvas></div>
+      <div class="card"><div class="label-xs" style="margin-bottom:12px">Category Breakdown</div><div id="an-cat-list"></div></div>
     </div>
-
-    <!-- INSIGHTS -->
     <div id="sub-insights" style="display:none">
       <div id="insights-list"></div>
       <div class="section-title">What Could Improve</div>
@@ -580,62 +338,21 @@
       <div class="section-title">Investment Health</div>
       <div class="card" id="health-list"></div>
     </div>
-
   </div>
 </div>
 
-
-<!-- ═══════════════════════ PDF RENDER CONTAINER ═══════════════════════ -->
-<div id="pdf-render-container" style="position:fixed;left:-9999px;top:0;width:800px;background:#fff;z-index:-1"></div>
-
-<!-- ═══════════════════════ PDF LOADING OVERLAY ═══════════════════════ -->
-<div id="pdf-overlay" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.85);z-index:999;flex-direction:column;align-items:center;justify-content:center">
-  <div style="background:#fff;border-radius:16px;padding:32px 40px;text-align:center;max-width:280px">
-    <div style="font-size:40px;margin-bottom:12px">📄</div>
-    <div style="font-size:16px;font-weight:700;color:#0f172a;margin-bottom:6px">Generating PDF</div>
-    <div style="font-size:13px;color:#64748b" id="pdf-status">Building your report...</div>
-    <div style="margin-top:16px;background:#f1f5f9;border-radius:99px;height:4px;overflow:hidden">
-      <div id="pdf-progress-bar" style="height:100%;width:0%;background:#4f46e5;border-radius:99px;transition:width 0.4s ease"></div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════ PAYMENT PICKER MODAL ═══════════════════════ -->
-<div id="payment-modal" style="display:none;position:fixed;inset:0;z-index:500">
-  <div id="payment-backdrop" onclick="closePaymentPicker()" style="position:absolute;inset:0;background:rgba(0,0,0,0.4)"></div>
-  <div style="position:absolute;bottom:0;left:0;right:0;background:#fff;border-radius:20px 20px 0 0;padding:0 0 env(safe-area-inset-bottom,16px);max-height:75vh;overflow-y:auto;transform:translateY(100%);transition:transform 0.3s ease" id="payment-sheet">
-    <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
-      <span style="font-size:14px;font-weight:700;color:var(--text1)">Select Payment Method</span>
-      <button onclick="closePaymentPicker()" style="background:none;border:none;font-size:22px;color:var(--text3);cursor:pointer;line-height:1">×</button>
-    </div>
-    <div id="payment-options" style="padding:8px 12px 16px"></div>
-  </div>
-</div>
-
-</div><!-- end app-shell -->
-<!-- ═══════════════════════ SCREEN 6: BILLS CHECKLIST ═══════════════════════ -->
 <div id="s-bills" class="screen">
-  <div class="page-header">
-    <div class="page-eyebrow">Monthly Checklist</div>
-    <div class="page-title">Bills & Payments</div>
-    <div class="page-sub" id="bills-progress-label">Loading...</div>
-  </div>
+  <div class="page-header"><div class="page-eyebrow">Monthly Checklist</div><div class="page-title">Bills & Payments</div><div class="page-sub" id="bills-progress-label">Loading...</div></div>
   <div class="pad">
     <div id="bills-month-nav" style="margin-top:16px"></div>
-    <button onclick="addNewBill()" style="width:100%;padding:12px;background:var(--indigo);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:6px">
-      + Add New Bill
-    </button>
+    <button onclick="addNewBill()" style="width:100%;padding:12px;background:var(--indigo);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:14px">+ Add New Bill</button>
     <div style="margin-bottom:12px">
       <div style="display:flex;justify-content:space-between;margin-bottom:8px">
         <span style="font-size:11px;font-weight:600;color:var(--text3)">MONTHLY PROGRESS</span>
         <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3)" id="bills-pct-label">0 / 0 paid</span>
       </div>
-      <div class="progress-track">
-        <div class="progress-fill" id="bills-progress-fill" style="width:0%;background:var(--indigo)"></div>
-      </div>
+      <div class="progress-track"><div class="progress-fill" id="bills-progress-fill" style="width:0%;background:var(--indigo)"></div></div>
     </div>
-
-    <!-- Legend -->
     <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
       <span style="font-size:10px;font-weight:600;color:var(--red)">● Overdue</span>
       <span style="font-size:10px;font-weight:600;color:var(--amber)">● Due soon (≤3 days)</span>
@@ -643,297 +360,182 @@
       <span style="font-size:10px;font-weight:600;color:var(--green)">● Paid</span>
       <span style="font-size:10px;font-weight:600;color:var(--text4)">● Auto-deduct</span>
     </div>
-
     <div id="bills-list"></div>
   </div>
 </div>
 
-<!-- ═══════════════════════ BOTTOM NAV ═══════════════════════ -->
+<div id="pdf-render-container" style="position:fixed;left:-9999px;top:0;width:800px;background:#fff;z-index:-1"></div>
+<div id="pdf-overlay" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.85);z-index:999;flex-direction:column;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:16px;padding:32px 40px;text-align:center;max-width:280px">
+    <div style="font-size:40px;margin-bottom:12px">📄</div>
+    <div style="font-size:16px;font-weight:700;color:#0f172a;margin-bottom:6px">Generating PDF</div>
+    <div style="font-size:13px;color:#64748b" id="pdf-status">Building your report...</div>
+    <div style="margin-top:16px;background:#f1f5f9;border-radius:99px;height:4px;overflow:hidden"><div id="pdf-progress-bar" style="height:100%;width:0%;background:#4f46e5;border-radius:99px;transition:width 0.4s ease"></div></div>
+  </div>
+</div>
+
+<div id="payment-modal" style="display:none;position:fixed;inset:0;z-index:500">
+  <div id="payment-backdrop" onclick="closePaymentPicker()" style="position:absolute;inset:0;background:rgba(0,0,0,0.4)"></div>
+  <div style="position:absolute;bottom:0;left:0;right:0;background:#fff;border-radius:20px 20px 0 0;padding:0 0 env(safe-area-inset-bottom,16px);max-height:75vh;overflow-y:auto;transform:translateY(100%);transition:transform 0.3s ease" id="payment-sheet">
+    <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:14px;font-weight:700;color:var(--text1)">Select Payment Method</span>
+      <button onclick="closePaymentPicker()" style="background:none;border:none;font-size:22px;color:var(--text3);cursor:pointer">×</button>
+    </div>
+    <div id="payment-options" style="padding:8px 12px 16px"></div>
+  </div>
+</div>
+
 <nav>
-  <button class="nav-btn active" onclick="showScreen('overview',this)" id="nav-overview">
-    <span class="nav-icon">◈</span>
-    <span class="nav-label">Overview</span>
-    <div class="nav-dot"></div>
-  </button>
-
-  <button class="nav-btn" onclick="showScreen('commitments',this)" id="nav-commitments">
-    <span class="nav-icon">≡</span>
-    <span class="nav-label">Fixed</span>
-    <div class="nav-dot"></div>
-  </button>
-  <button class="nav-btn" onclick="showScreen('wealth',this)" id="nav-wealth">
-    <span class="nav-icon">◇</span>
-    <span class="nav-label">Wealth</span>
-    <div class="nav-dot"></div>
-  </button>
-  <button class="nav-btn" onclick="showScreen('analyzer',this)" id="nav-analyzer">
-    <span class="nav-icon">🧠</span>
-    <span class="nav-label">Analyze</span>
-    <div class="nav-dot"></div>
-  </button>
-  <button class="nav-btn" onclick="showScreen('bills',this)" id="nav-bills">
-    <span class="nav-icon">✅</span>
-    <span class="nav-label">Bills</span>
-    <div class="nav-dot"></div>
-  </button>
+  <button class="nav-btn active" onclick="showScreen('overview',this)" id="nav-overview"><span class="nav-icon">◈</span><span class="nav-label">Overview</span><div class="nav-dot"></div></button>
+  <button class="nav-btn" onclick="showScreen('expenses',this)" id="nav-expenses"><span class="nav-icon">↓</span><span class="nav-label">Expenses</span><div class="nav-dot"></div></button>
+  <button class="nav-btn" onclick="showScreen('commitments',this)" id="nav-commitments"><span class="nav-icon">≡</span><span class="nav-label">Fixed</span><div class="nav-dot"></div></button>
+  <button class="nav-btn" onclick="showScreen('wealth',this)" id="nav-wealth"><span class="nav-icon">◇</span><span class="nav-label">Wealth</span><div class="nav-dot"></div></button>
+  <button class="nav-btn" onclick="showScreen('analyzer',this)" id="nav-analyzer"><span class="nav-icon">🧠</span><span class="nav-label">Analyze</span><div class="nav-dot"></div></button>
+  <button class="nav-btn" onclick="showScreen('bills',this)" id="nav-bills"><span class="nav-icon">✅</span><span class="nav-label">Bills</span><div class="nav-dot"></div></button>
 </nav>
+</div><!-- end app-shell -->
 <script>
-// ══════════════════════════════════════════════════════════════════════
-// 1. STORAGE HELPERS
-// ══════════════════════════════════════════════════════════════════════
-const load = (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } };
-const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
-
-// ══════════════════════════════════════════════════════════════════════
-// 2. STATIC CONSTANTS (no personal data)
-// ══════════════════════════════════════════════════════════════════════
-const MONTHLY_RETURN_8  = Math.pow(1.08, 1/12) - 1;
-const MONTHLY_RETURN_10 = Math.pow(1.10, 1/12) - 1;
-const MONTHLY_RETURN_12 = Math.pow(1.12, 1/12) - 1;
-const MONTHS_SHORT   = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-const MONTHS_FULL    = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-
-const CATS = [
-  { label:"Fuel",          icon:"⛽", color:"#6366f1" },
-  { label:"Food",          icon:"🍽️", color:"#f59e0b" },
-  { label:"Diapers",       icon:"👶", color:"#22c55e" },
-  { label:"Formula",       icon:"🍼", color:"#ec4899" },
-  { label:"Groceries",     icon:"🛒", color:"#14b8a6" },
-  { label:"Medical",       icon:"💊", color:"#ef4444" },
-  { label:"Entertainment", icon:"🎬", color:"#a855f7" },
-  { label:"Shopping",      icon:"🛍️", color:"#f97316" },
-  { label:"Other",         icon:"📌", color:"#64748b" },
-  { label:"Bills",         icon:"🧾", color:"#0ea5e9" },
+const load=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}};
+const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
+const MONTHLY_RETURN_8=Math.pow(1.08,1/12)-1;
+const MONTHLY_RETURN_10=Math.pow(1.10,1/12)-1;
+const MONTHLY_RETURN_12=Math.pow(1.12,1/12)-1;
+const MONTHS_SHORT=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const MONTHS_FULL=["January","February","March","April","May","June","July","August","September","October","November","December"];
+const CATS=[
+  {label:"Fuel",icon:"⛽",color:"#6366f1"},{label:"Food",icon:"🍽️",color:"#f59e0b"},
+  {label:"Diapers",icon:"👶",color:"#22c55e"},{label:"Formula",icon:"🍼",color:"#ec4899"},
+  {label:"Groceries",icon:"🛒",color:"#14b8a6"},{label:"Medical",icon:"💊",color:"#ef4444"},
+  {label:"Entertainment",icon:"🎬",color:"#a855f7"},{label:"Shopping",icon:"🛍️",color:"#f97316"},
+  {label:"Other",icon:"📌",color:"#64748b"},{label:"Bills",icon:"🧾",color:"#0ea5e9"},
 ];
-const AVOIDABLE = ["Entertainment","Shopping","Other"];
-
-const DEFAULT_FIXED = [
-  { label:"Rental",            amount:0 },
-  { label:"Church Tithes",     amount:0 },
-  { label:"Dato Onn Mortgage", amount:0 },
-  { label:"Ipoh Mortgage",     amount:0 },
-  { label:"Ipoh Maintenance",  amount:0 },
-  { label:"WiFi",              amount:0 },
-  { label:"U Mobile",          amount:0 },
-  { label:"Wife Allowance",    amount:0 },
-  { label:"Mazda",             amount:0 },
-  { label:"YouTube",           amount:0 },
-  { label:"Claude",            amount:0 },
-  { label:"iCloud",            amount:0 },
-  { label:"AIA Insurance",     amount:0 },
-  { label:"Amma",              amount:0 },
-  { label:"Appa",              amount:0 },
-  { label:"Kashmir Trip",      amount:0 },
+const AVOIDABLE=["Entertainment","Shopping","Other"];
+const DEFAULT_FIXED=[
+  {label:"Rental",amount:0},{label:"Church Tithes",amount:0},{label:"Dato Onn Mortgage",amount:0},
+  {label:"Ipoh Mortgage",amount:0},{label:"Ipoh Maintenance",amount:0},{label:"WiFi",amount:0},
+  {label:"U Mobile",amount:0},{label:"Wife Allowance",amount:0},{label:"Mazda",amount:0},
+  {label:"YouTube",amount:0},{label:"Claude",amount:0},{label:"iCloud",amount:0},
+  {label:"AIA Insurance",amount:0},{label:"Amma",amount:0},{label:"Appa",amount:0},{label:"Kashmir Trip",amount:0},
 ];
-
-const LABEL_TO_BILL = {
+const LABEL_TO_BILL={
   "Rental":"rental","Church Tithes":"tithes","Dato Onn Mortgage":"datoOnn",
   "Ipoh Mortgage":"ipohMort","Ipoh Maintenance":"ipohMaint","WiFi":"wifi",
   "U Mobile":"umobile","Wife Allowance":"wife","Mazda":"mazda",
   "YouTube":"youtube","Claude":"claude","iCloud":"icloud",
   "AIA Insurance":"aia","Amma":"amma","Appa":"appa","Kashmir Trip":"kashmir",
 };
-
-const BILL_DEFS = [
-  { id:"rental",    label:"Rental",            amount:0,    due:1,    auto:false, icon:"🏠" },
-  { id:"tithes",    label:"Church Tithes",     amount:0,    due:"w1", auto:false, icon:"✝️" },
-  { id:"datoOnn",   label:"Dato Onn Mortgage", amount:0,    due:1,    auto:false, icon:"🏗️" },
-  { id:"ipohMort",  label:"Ipoh Mortgage",     amount:0,    due:5,    auto:false, icon:"🏠" },
-  { id:"ipohMaint", label:"Ipoh Maintenance",  amount:0,    due:14,   auto:false, icon:"🔧" },
-  { id:"wifi",      label:"WiFi",              amount:0,    due:4,    auto:false, icon:"svg:unifi" },
-  { id:"umobile",   label:"U Mobile",          amount:0,    due:7,    auto:false, icon:"svg:umobile" },
-  { id:"wife",      label:"Wife Allowance",    amount:0,    due:null, auto:false, icon:"👩" },
-  { id:"mazda",     label:"Mazda",             amount:0,    due:3,    auto:false, icon:"svg:mazda" },
-  { id:"youtube",   label:"YouTube",           amount:0,    due:null, auto:true,  icon:"svg:youtube" },
-  { id:"claude",    label:"Claude",            amount:0,    due:null, auto:true,  icon:"svg:claude" },
-  { id:"icloud",    label:"iCloud",            amount:0,    due:null, auto:true,  icon:"svg:icloud" },
-  { id:"aia",       label:"AIA Insurance",     amount:0,    due:null, auto:true,  icon:"svg:aia" },
-  { id:"amma",      label:"Amma",              amount:0,    due:null, auto:false, icon:"👵" },
-  { id:"appa",      label:"Appa",              amount:0,    due:null, auto:false, icon:"👴" },
-  { id:"kashmir",   label:"Kashmir Trip",      amount:0,    due:null, auto:false, icon:"✈️" },
-  { id:"tnb",       label:"TNB",               amount:null, due:5,    auto:false, icon:"svg:tnb",     variable:true },
-  { id:"water",     label:"Water Bill",        amount:null, due:5,    auto:false, icon:"💧",          variable:true },
-  { id:"voo",       label:"VOO Investment",    amount:0,    due:null, auto:false, icon:"svg:vanguard",investment:true },
+const BILL_DEFS=[
+  {id:"rental",label:"Rental",amount:0,due:1,auto:false,icon:"🏠"},
+  {id:"tithes",label:"Church Tithes",amount:0,due:"w1",auto:false,icon:"✝️"},
+  {id:"datoOnn",label:"Dato Onn Mortgage",amount:0,due:1,auto:false,icon:"🏗️"},
+  {id:"ipohMort",label:"Ipoh Mortgage",amount:0,due:5,auto:false,icon:"🏠"},
+  {id:"ipohMaint",label:"Ipoh Maintenance",amount:0,due:14,auto:false,icon:"🔧"},
+  {id:"wifi",label:"WiFi",amount:0,due:4,auto:false,icon:"svg:unifi"},
+  {id:"umobile",label:"U Mobile",amount:0,due:7,auto:false,icon:"svg:umobile"},
+  {id:"wife",label:"Wife Allowance",amount:0,due:null,auto:false,icon:"👩"},
+  {id:"mazda",label:"Mazda",amount:0,due:3,auto:false,icon:"svg:mazda"},
+  {id:"youtube",label:"YouTube",amount:0,due:null,auto:true,icon:"svg:youtube"},
+  {id:"claude",label:"Claude",amount:0,due:null,auto:true,icon:"svg:claude"},
+  {id:"icloud",label:"iCloud",amount:0,due:null,auto:true,icon:"svg:icloud"},
+  {id:"aia",label:"AIA Insurance",amount:0,due:null,auto:true,icon:"svg:aia"},
+  {id:"amma",label:"Amma",amount:0,due:null,auto:false,icon:"👵"},
+  {id:"appa",label:"Appa",amount:0,due:null,auto:false,icon:"👴"},
+  {id:"kashmir",label:"Kashmir Trip",amount:0,due:null,auto:false,icon:"✈️"},
+  {id:"tnb",label:"TNB",amount:null,due:5,auto:false,icon:"svg:tnb",variable:true},
+  {id:"water",label:"Water Bill",amount:null,due:5,auto:false,icon:"💧",variable:true},
+  {id:"voo",label:"VOO Investment",amount:0,due:null,auto:false,icon:"svg:vanguard",investment:true},
 ];
-
-const STATUS_CONFIG = {
-  paid:      { color:"var(--green)",  bg:"var(--green2)",  border:"#6ee7b7", label:"Paid" },
-  auto:      { color:"var(--text4)",  bg:"var(--surface2)",border:"var(--border)", label:"Auto" },
-  noduedate: { color:"var(--indigo)", bg:"var(--indigo3)", border:"#a5b4fc", label:"No due date" },
-  overdue:   { color:"var(--red)",    bg:"var(--red2)",    border:"#fca5a5", label:"Overdue" },
-  duesoon:   { color:"var(--amber)",  bg:"var(--amber2)",  border:"#fcd34d", label:"Due soon" },
-  upcoming:  { color:"var(--indigo)", bg:"#f5f3ff",        border:"#c4b5fd", label:"Upcoming" },
+const STATUS_CONFIG={
+  paid:{color:"var(--green)",bg:"var(--green2)",border:"#6ee7b7",label:"Paid"},
+  auto:{color:"var(--text4)",bg:"var(--surface2)",border:"var(--border)",label:"Auto"},
+  noduedate:{color:"var(--indigo)",bg:"var(--indigo3)",border:"#a5b4fc",label:"No due date"},
+  overdue:{color:"var(--red)",bg:"var(--red2)",border:"#fca5a5",label:"Overdue"},
+  duesoon:{color:"var(--amber)",bg:"var(--amber2)",border:"#fcd34d",label:"Due soon"},
+  upcoming:{color:"var(--indigo)",bg:"#f5f3ff",border:"#c4b5fd",label:"Upcoming"},
 };
-
-// ══════════════════════════════════════════════════════════════════════
-// 3. MUTABLE STATE — all loaded from localStorage
-// ══════════════════════════════════════════════════════════════════════
-// Profile (personal data — stored only on device)
-let profile = load("dev_profile", {
-  sgdSalary:    0,
-  airbnbIncome: 0,
-  vooMonthly:   0,
-  currentPort:  0,
-  goal1:        1000000,
-  goal2:        3000000,
-  goal3:        5000000,
-  years:        20,
-  billsStartYear:  2026,
-  billsStartMonth: 6,
-  renoGoal:        100000,
-  renoSaved:       0,
-  // wealth items
-  sgdSavings:   0,
-  moomooPort:   0,
-  moomooCash:   0,
-  datoOnnVal:      0,
-  datoOnnEquity:   0,
-  datoOnnLoan:     1557357,
-  datoOnnPrice:    1687800,
-  ipohVal:         0,
-  ipohLoan:        418063,
+let profile=load("dev_profile",{
+  sgdSalary:0,airbnbIncome:0,vooMonthly:0,currentPort:0,
+  goal1:1000000,goal2:3000000,goal3:5000000,years:20,
+  billsStartYear:2026,billsStartMonth:6,renoGoal:100000,renoSaved:0,
+  sgdSavings:0,moomooPort:0,moomooCash:0,
+  datoOnnVal:0,datoOnnLoan:1557357,datoOnnPrice:1687800,ipohVal:0,ipohLoan:418063,
 });
-
-let SGD_RATE     = parseFloat(load("dev_sgdrate", {}).rate) || 3.15;
-let GROSS_MYR    = profile.sgdSalary * SGD_RATE;
-let TOTAL_INCOME = GROSS_MYR + profile.airbnbIncome;
-
-let expenses   = load("dev_expenses", []);
-let fixedCom   = load("dev_fixed", DEFAULT_FIXED);
-let billsState = load("dev_bills", {});
-
-const _now = new Date();
-let billsViewYear  = (_now.getFullYear() > profile.billsStartYear || (_now.getFullYear() === profile.billsStartYear && _now.getMonth() >= profile.billsStartMonth)) ? _now.getFullYear() : profile.billsStartYear;
-let billsViewMonth = (_now.getFullYear() > profile.billsStartYear || (_now.getFullYear() === profile.billsStartYear && _now.getMonth() >= profile.billsStartMonth)) ? _now.getMonth() : profile.billsStartMonth;
-
-let currentSubtab = "projection";
-let pieChart = null, projChart = null, trendChart = null;
-
-// Sync BILL_DEFS amounts from fixedCom
-function syncBillAmounts() {
-  BILL_DEFS.forEach(def => {
-    const fc = fixedCom.find(f => LABEL_TO_BILL[f.label] === def.id);
-    if (fc) def.amount = fc.amount;
-  });
-  // VOO from profile
-  const vooDef = BILL_DEFS.find(d => d.id === "voo");
-  if (vooDef) vooDef.amount = profile.vooMonthly;
+let SGD_RATE=parseFloat(load("dev_sgdrate",{}).rate)||3.15;
+let GROSS_MYR=profile.sgdSalary*SGD_RATE;
+let TOTAL_INCOME=GROSS_MYR+profile.airbnbIncome;
+let expenses=load("dev_expenses",[]);
+let fixedCom=load("dev_fixed",DEFAULT_FIXED);
+let billsState=load("dev_bills",{});
+const _now=new Date();
+let billsViewYear=(_now.getFullYear()>profile.billsStartYear||(_now.getFullYear()===profile.billsStartYear&&_now.getMonth()>=profile.billsStartMonth))?_now.getFullYear():profile.billsStartYear;
+let billsViewMonth=(_now.getFullYear()>profile.billsStartYear||(_now.getFullYear()===profile.billsStartYear&&_now.getMonth()>=profile.billsStartMonth))?_now.getMonth():profile.billsStartMonth;
+let currentSubtab="projection";
+let pieChart=null,projChart=null,trendChart=null;
+function syncBillAmounts(){
+  BILL_DEFS.forEach(def=>{const fc=fixedCom.find(f=>LABEL_TO_BILL[f.label]===def.id);if(fc)def.amount=fc.amount;});
+  const vooDef=BILL_DEFS.find(d=>d.id==="voo");if(vooDef)vooDef.amount=profile.vooMonthly;
 }
-
-function saveProfile() {
-  save("dev_profile", profile);
-  GROSS_MYR    = profile.sgdSalary * SGD_RATE;
-  TOTAL_INCOME = GROSS_MYR + profile.airbnbIncome;
+function saveProfile(){
+  save("dev_profile",profile);
+  GROSS_MYR=profile.sgdSalary*SGD_RATE;
+  TOTAL_INCOME=GROSS_MYR+profile.airbnbIncome;
   syncBillAmounts();
 }
-
-// ══════════════════════════════════════════════════════════════════════
-// 4. COMPUTED HELPERS
-// ══════════════════════════════════════════════════════════════════════
-const totalFixed = () => fixedCom.reduce((s,f) => s + Number(f.amount), 0);
-const totalVar   = () => {
-  const mk = billsMonthKey();
-  const bs = (billsState[mk] || {});
-  return (parseFloat((bs.tnb||{}).amount)||0) + (parseFloat((bs.water||{}).amount)||0);
+const totalFixed=()=>fixedCom.reduce((s,f)=>s+Number(f.amount),0);
+const totalVar=()=>{const mk=billsMonthKey(),bs=(billsState[mk]||{});return(parseFloat((bs.tnb||{}).amount)||0)+(parseFloat((bs.water||{}).amount)||0);};
+const discretionary=()=>TOTAL_INCOME-totalFixed()-totalVar()-profile.vooMonthly;
+const monthlyExpenses=(m,y)=>expenses.filter(e=>{const d=new Date(e.date);return d.getMonth()===m&&d.getFullYear()===y;});
+const fmtMYR=(n,compact)=>{
+  if(n==null)return"—";
+  if(compact){if(n>=1_000_000)return`RM ${(n/1_000_000).toFixed(2)}M`;if(n>=1000)return`RM ${(n/1000).toFixed(1)}k`;}
+  return`RM ${Number(n).toLocaleString("en-MY",{minimumFractionDigits:0,maximumFractionDigits:0})}`;
 };
-const discretionary = () => TOTAL_INCOME - totalFixed() - totalVar() - profile.vooMonthly;
-const monthlyExpenses = (m,y) => expenses.filter(e => { const d=new Date(e.date); return d.getMonth()===m&&d.getFullYear()===y; });
-
-const fmtMYR = (n, compact) => {
-  if (n == null) return "—";
-  if (compact) {
-    if (n >= 1_000_000) return `RM ${(n/1_000_000).toFixed(2)}M`;
-    if (n >= 1000) return `RM ${(n/1000).toFixed(1)}k`;
-  }
-  return `RM ${Number(n).toLocaleString("en-MY",{minimumFractionDigits:0,maximumFractionDigits:0})}`;
-};
-
-function toast(msg) {
-  const t=document.getElementById("toast");
-  t.textContent=msg||"Saved ✓"; t.classList.add("show");
-  setTimeout(()=>t.classList.remove("show"),2000);
+function toast(msg){const t=document.getElementById("toast");t.textContent=msg||"Saved ✓";t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2000);}
+function isSetupDone(){return profile.sgdSalary>0&&profile.vooMonthly>0;}
+function showSetup(){
+  document.getElementById("setup-screen").style.display="block";
+  document.getElementById("app-shell").style.display="none";
+  document.getElementById("setup-salary").value=profile.sgdSalary||"";
+  document.getElementById("setup-airbnb").value=profile.airbnbIncome||"";
+  document.getElementById("setup-voo").value=profile.vooMonthly||"";
+  document.getElementById("setup-port").value=profile.currentPort||"";
+  document.getElementById("setup-goal1").value=profile.goal1||1000000;
+  document.getElementById("setup-goal2").value=profile.goal2||3000000;
+  document.getElementById("setup-goal3").value=profile.goal3||5000000;
+  document.getElementById("setup-years").value=profile.years||20;
+  document.getElementById("setup-sgdsav").value=profile.sgdSavings||"";
+  document.getElementById("setup-moomoo").value=profile.moomooPort||"";
+  document.getElementById("setup-cash").value=profile.moomooCash||"";
+  const sms=document.getElementById("setup-startmonth");if(sms)sms.value=profile.billsStartMonth;
+  document.getElementById("setup-startyear").value=profile.billsStartYear;
+  const _rg=document.getElementById("setup-reno-goal");if(_rg)_rg.value=profile.renoGoal||"";
+  const _rs=document.getElementById("setup-reno-saved");if(_rs)_rs.value=profile.renoSaved||"";
+  const _dv=document.getElementById("setup-datoOnnVal");if(_dv)_dv.value=profile.datoOnnVal||"";
+  const _iv=document.getElementById("setup-ipohVal");if(_iv)_iv.value=profile.ipohVal||"";
 }
-
-// ══════════════════════════════════════════════════════════════════════
-// 5. SETUP SCREEN
-// ══════════════════════════════════════════════════════════════════════
-function isSetupDone() {
-  return profile.sgdSalary > 0 && profile.vooMonthly > 0;
+function saveSetup(){
+  const get=id=>parseFloat(document.getElementById(id).value)||0;
+  const getInt=id=>parseInt(document.getElementById(id).value)||0;
+  if(!get("setup-salary")||!get("setup-voo")){toast("⚠ Salary and VOO required");return;}
+  profile.sgdSalary=get("setup-salary");profile.airbnbIncome=get("setup-airbnb");
+  profile.vooMonthly=get("setup-voo");profile.currentPort=get("setup-port");
+  profile.goal1=get("setup-goal1")||1000000;profile.goal2=get("setup-goal2")||3000000;
+  profile.goal3=get("setup-goal3")||5000000;profile.years=getInt("setup-years")||20;
+  profile.sgdSavings=get("setup-sgdsav");profile.moomooPort=get("setup-moomoo");profile.moomooCash=get("setup-cash");
+  profile.billsStartMonth=getInt("setup-startmonth");profile.billsStartYear=getInt("setup-startyear");
+  profile.renoGoal=get("setup-reno-goal")||100000;profile.renoSaved=get("setup-reno-saved")||0;
+  profile.datoOnnVal=get("setup-datoOnnVal")||0;profile.ipohVal=get("setup-ipohVal")||0;
+  saveProfile();save("dev_fixed",fixedCom);
+  document.getElementById("setup-screen").style.display="none";
+  document.getElementById("app-shell").style.display="block";
+  renderOverview();renderCommitments();toast("Profile saved ✓");
 }
-
-function showSetup() {
-  document.getElementById("setup-screen").style.display = "block";
-  document.getElementById("app-shell").style.display    = "none";
-  // Pre-fill if editing
-  document.getElementById("setup-salary").value    = profile.sgdSalary    || "";
-  document.getElementById("setup-airbnb").value    = profile.airbnbIncome || "";
-  document.getElementById("setup-voo").value       = profile.vooMonthly   || "";
-  document.getElementById("setup-port").value      = profile.currentPort  || "";
-  document.getElementById("setup-goal1").value     = profile.goal1        || 1000000;
-  document.getElementById("setup-goal2").value     = profile.goal2        || 3000000;
-  document.getElementById("setup-goal3").value     = profile.goal3        || 5000000;
-  document.getElementById("setup-years").value     = profile.years        || 20;
-  document.getElementById("setup-sgdsav").value    = profile.sgdSavings   || "";
-  document.getElementById("setup-moomoo").value    = profile.moomooPort   || "";
-  document.getElementById("setup-cash").value      = profile.moomooCash   || "";
-  document.getElementById("setup-startmonth").value= profile.billsStartMonth;
-  document.getElementById("setup-startyear").value = profile.billsStartYear;
-  const _rg=document.getElementById("setup-reno-goal");   if(_rg) _rg.value=profile.renoGoal||"";
-  const _rs=document.getElementById("setup-reno-saved");  if(_rs) _rs.value=profile.renoSaved||"";
-  const _dv=document.getElementById("setup-datoOnnVal");  if(_dv) _dv.value=profile.datoOnnVal||"";
-  const _iv=document.getElementById("setup-ipohVal");     if(_iv) _iv.value=profile.ipohVal||"";
-}
-
-function saveSetup() {
-  const get = id => parseFloat(document.getElementById(id).value)||0;
-  const getInt = id => parseInt(document.getElementById(id).value)||0;
-
-  if (!get("setup-salary") || !get("setup-voo")) {
-    toast("⚠ Salary and VOO amount are required"); return;
-  }
-
-  profile.sgdSalary       = get("setup-salary");
-  profile.airbnbIncome    = get("setup-airbnb");
-  profile.vooMonthly      = get("setup-voo");
-  profile.currentPort     = get("setup-port");
-  profile.goal1           = get("setup-goal1") || 1000000;
-  profile.goal2           = get("setup-goal2") || 3000000;
-  profile.goal3           = get("setup-goal3") || 5000000;
-  profile.years           = getInt("setup-years") || 20;
-  profile.sgdSavings      = get("setup-sgdsav");
-  profile.moomooPort      = get("setup-moomoo");
-  profile.moomooCash      = get("setup-cash");
-  profile.billsStartMonth = getInt("setup-startmonth");
-  profile.billsStartYear  = getInt("setup-startyear");
-  profile.renoGoal        = get("setup-reno-goal")   || 100000;
-  profile.renoSaved       = get("setup-reno-saved")  || 0;
-  profile.datoOnnVal      = get("setup-datoOnnVal")  || 0;
-  profile.ipohVal         = get("setup-ipohVal")     || 0;
-
-  saveProfile();
-  save("dev_fixed", fixedCom); // amounts still from Fixed tab
-  document.getElementById("setup-screen").style.display = "none";
-  document.getElementById("app-shell").style.display    = "block";
-  renderOverview();
-  renderCommitments();
-  toast("Profile saved ✓");
-}
-
-function resetApp() {
-  if (!confirm("Reset all data? This cannot be undone.")) return;
-  localStorage.clear();
-  location.reload();
-}
-
-// ══════════════════════════════════════════════════════════════════════
-// 6. BILLS STATE HELPERS
-// ══════════════════════════════════════════════════════════════════════
-function billsMonthKey(y,m) { return `${y!==undefined?y:billsViewYear}-${m!==undefined?m:billsViewMonth}`; }
-function getBillState(id) { const mk=billsMonthKey(); return ((billsState[mk]||{})[id])||{paid:false,amount:null,payment:"",note:""}; }
-function saveBillState(id,patch) { const mk=billsMonthKey(); if(!billsState[mk]) billsState[mk]={}; billsState[mk][id]={...getBillState(id),...patch}; save("dev_bills",billsState); }
-function isCurrentBillsMonth() { const n=new Date(); return billsViewMonth===n.getMonth()&&billsViewYear===n.getFullYear(); }
-
-function navigateBillsMonth(delta) {
+function resetApp(){if(!confirm("Reset all data?"))return;localStorage.clear();location.reload();}
+function billsMonthKey(y,m){return`${y!==undefined?y:billsViewYear}-${m!==undefined?m:billsViewMonth}`;}
+function getBillState(id){const mk=billsMonthKey();return((billsState[mk]||{})[id])||{paid:false,amount:null,payment:"",note:""};}
+function saveBillState(id,patch){const mk=billsMonthKey();if(!billsState[mk])billsState[mk]={};billsState[mk][id]={...getBillState(id),...patch};save("dev_bills",billsState);}
+function isCurrentBillsMonth(){const n=new Date();return billsViewMonth===n.getMonth()&&billsViewYear===n.getFullYear();}
+function navigateBillsMonth(delta){
   billsViewMonth+=delta;
   if(billsViewMonth>11){billsViewMonth=0;billsViewYear++;}
   if(billsViewMonth<0){billsViewMonth=11;billsViewYear--;}
@@ -942,72 +544,55 @@ function navigateBillsMonth(delta) {
   if(billsViewYear>n.getFullYear()||(billsViewYear===n.getFullYear()&&billsViewMonth>n.getMonth())){billsViewYear=n.getFullYear();billsViewMonth=n.getMonth();}
   renderBills();
 }
-
-function dueDayLabel(def) {
-  if(def.auto) return "Auto-deduct";
-  if(def.investment) return "Invest by end of month";
-  if(def.due===null) return "No due date";
-  if(def.due==="w1") return "1st week of month";
-  return `${def.due}${["st","nd","rd"][def.due-1]||"th"} of month`;
+function dueDayLabel(def){
+  if(def.auto)return"Auto-deduct";if(def.investment)return"Invest by end of month";
+  if(def.due===null)return"No due date";if(def.due==="w1")return"1st week of month";
+  return`${def.due}${["st","nd","rd"][def.due-1]||"th"} of month`;
 }
-
-function dueStatus(def) {
-  const st=getBillState(def.id);
-  if(st.paid) return "paid";
-  if(def.auto) return "auto";
-  if(def.due===null) return "noduedate";
-  if(!isCurrentBillsMonth()) return "upcoming";
-  const day=new Date().getDate(), dueDay=def.due==="w1"?7:def.due, diff=dueDay-day;
-  if(diff<0) return "overdue";
-  if(diff<=3) return "duesoon";
-  return "upcoming";
+function dueStatus(def){
+  const st=getBillState(def.id);if(st.paid)return"paid";if(def.auto)return"auto";
+  if(def.due===null)return"noduedate";if(!isCurrentBillsMonth())return"upcoming";
+  const day=new Date().getDate(),dueDay=def.due==="w1"?7:def.due,diff=dueDay-day;
+  if(diff<0)return"overdue";if(diff<=3)return"duesoon";return"upcoming";
 }
-
-// ══════════════════════════════════════════════════════════════════════
-// 7. NAVIGATION
-// ══════════════════════════════════════════════════════════════════════
-function showScreen(name,btn) {
+function showScreen(name,btn){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
-  document.getElementById("s-"+name).classList.add("active");
-  btn.classList.add("active");
-  if(name==="overview")    renderOverview();
-  if(name==="commitments") renderCommitments();
-  if(name==="wealth")      renderWealth();
-  if(name==="analyzer")    renderAnalyzer();
-  if(name==="bills")       {renderBills();renderOverview();}
+  document.getElementById("s-"+name).classList.add("active");btn.classList.add("active");
+  if(name==="overview")renderOverview();
+  if(name==="expenses")renderExpenses();
+  if(name==="commitments")renderCommitments();
+  if(name==="wealth")renderWealth();
+  if(name==="analyzer")renderAnalyzer();
+  if(name==="bills"){renderBills();renderOverview();}
 }
-function setSubtab(name) {
+function setSubtab(name){
   currentSubtab=name;
-  ["projection","spending","insights"].forEach(s=>{document.getElementById("sub-"+s).style.display=s===name?"block":"none";document.getElementById("st-"+s).classList.toggle("active",s===name);});
-  if(name==="spending") renderAnalyzerSpending();
-  if(name==="insights") renderInsights();
+  ["projection","spending","insights"].forEach(s=>{
+    document.getElementById("sub-"+s).style.display=s===name?"block":"none";
+    document.getElementById("st-"+s).classList.toggle("active",s===name);
+  });
+  if(name==="spending")renderAnalyzerSpending();
+  if(name==="insights")renderInsights();
 }
-
-// ══════════════════════════════════════════════════════════════════════
-// 8. OVERVIEW
-// ══════════════════════════════════════════════════════════════════════
-function renderOverview() {
-  const now=new Date(), m=now.getMonth(), y=now.getFullYear();
+function renderOverview(){
+  const now=new Date(),m=now.getMonth(),y=now.getFullYear();
   document.getElementById("ov-month-title").textContent=MONTHS_FULL[m]+" "+y;
-  const airbnbActual=getAirbnbIncome(m,y);
-  const actualIncome=GROSS_MYR+(airbnbActual||profile.airbnbIncome||0);
-  document.getElementById("ov-income").textContent=fmtMYR(actualIncome);
+  document.getElementById("ov-income").textContent=fmtMYR(TOTAL_INCOME);
   document.getElementById("ov-fixed").textContent=fmtMYR(totalFixed());
   document.getElementById("ov-fixed-hint").textContent=fixedCom.length+" items";
-  const vv=totalVar();
-  document.getElementById("ov-util").textContent=vv>0?fmtMYR(vv):"Set in Bills tab";
+  const vv=totalVar();document.getElementById("ov-util").textContent=vv>0?fmtMYR(vv):"Set in Bills tab";
   const manualBills=BILL_DEFS.filter(d=>!d.auto);
   const paidBills=manualBills.filter(d=>getBillState(d.id).paid).length;
   document.getElementById("ov-bills-cleared").textContent=paidBills+" / "+manualBills.length;
   document.getElementById("ov-bills-hint").textContent="manual bills cleared";
-  const disc=discretionary(), exps=monthlyExpenses(m,y);
+  const disc=discretionary(),exps=monthlyExpenses(m,y);
   const spent=exps.reduce((s,e)=>s+Number(e.amount),0);
-  const left=disc-spent, pct=disc>0?Math.min(Math.round((spent/disc)*100),100):0;
+  const left=disc-spent,pct=disc>0?Math.min(Math.round((spent/disc)*100),100):0;
   const daysLeft=new Date(y,m+1,0).getDate()-now.getDate();
   document.getElementById("ov-remain").textContent=fmtMYR(Math.max(0,left));
   document.getElementById("ov-days-hint").textContent=daysLeft+" days left";
-  const discEl=document.getElementById("ov-disc"); if(discEl) discEl.textContent=fmtMYR(disc);
+  const discEl=document.getElementById("ov-disc");if(discEl)discEl.textContent=fmtMYR(disc);
   document.getElementById("ov-burn-label").textContent=fmtMYR(spent,true)+" / "+fmtMYR(disc,true);
   document.getElementById("ov-burn-pct").textContent=pct+"% used";
   document.getElementById("ov-burn-left").textContent=fmtMYR(Math.max(0,left))+" left";
@@ -1015,431 +600,152 @@ function renderOverview() {
   const toneCol={green:"var(--green)",amber:"var(--amber)",red:"var(--red)"};
   document.getElementById("ov-burn-fill").style.width=pct+"%";
   document.getElementById("ov-burn-fill").style.background=toneCol[tone];
-  const dir=document.getElementById("ov-directive"), dirTxt=document.getElementById("ov-directive-text");
+  const dir=document.getElementById("ov-directive"),dirTxt=document.getElementById("ov-directive-text");
   dir.className="directive "+tone;
-  if(pct<40) dirTxt.textContent=`You've used ${pct}% of discretionary with ${daysLeft} days left. Strong position — consider pushing extra into VOO.`;
-  else if(pct<70) dirTxt.textContent=`${pct}% used with ${daysLeft} days remaining. Watch food and fuel spend. ${fmtMYR(left)} left.`;
-  else dirTxt.textContent=`${pct}% of discretionary spent. Only ${fmtMYR(Math.max(0,left))} left for ${daysLeft} days. Freeze non-essential spend.`;
-  const g1=document.getElementById("qlog-grid1"), g2=document.getElementById("qlog-grid2");
+  if(pct<40)dirTxt.textContent=`You've used ${pct}% of discretionary with ${daysLeft} days left. Strong position.`;
+  else if(pct<70)dirTxt.textContent=`${pct}% used with ${daysLeft} days remaining. ${fmtMYR(left)} left.`;
+  else dirTxt.textContent=`${pct}% spent. Only ${fmtMYR(Math.max(0,left))} left for ${daysLeft} days. Freeze non-essential spend.`;
+  const g1=document.getElementById("qlog-grid1"),g2=document.getElementById("qlog-grid2");
   if(g1){g1.innerHTML="";g2.innerHTML="";}
-  const catSel=document.getElementById("f-cat"); if(catSel) catSel.innerHTML="";
+  const catSel=document.getElementById("f-cat");if(catSel)catSel.innerHTML="";
   CATS.forEach((c,i)=>{
     if(g1){const btn=document.createElement("button");btn.className="qlog-btn";btn.id="qb-"+c.label;btn.innerHTML=`<span class="qlog-icon">${c.icon}</span><span class="qlog-label">${c.label}</span>`;btn.onclick=()=>openForm(c.label);(i<4?g1:g2).appendChild(btn);}
     if(catSel){const opt=document.createElement("option");opt.value=c.label;opt.textContent=c.icon+" "+c.label;catSel.appendChild(opt);}
   });
-  // Renovation fund — surplus goes here
-  const renoGoal    = profile.renoGoal  || 100000;
-  const renoSaved   = profile.renoSaved || 0;
-  const renoMonthly = Math.max(0, left); // whatever's left after spending
-  const renoTotal   = renoSaved + renoMonthly;
-  const renoPct     = Math.min(Math.round((renoTotal / renoGoal) * 100), 100);
-  const renoEl      = document.getElementById("ov-reno-saved");
-  const renoHint    = document.getElementById("ov-reno-hint");
-  const renoMon     = document.getElementById("ov-reno-monthly");
-  const renoFill    = document.getElementById("ov-reno-fill");
-  const renoPctEl   = document.getElementById("ov-reno-pct");
-  const renoGoalEl  = document.getElementById("ov-reno-goal");
-  if(renoEl)    renoEl.textContent    = fmtMYR(renoTotal);
-  if(renoHint)  renoHint.textContent  = "total saved incl. this month";
-  if(renoMon)   renoMon.textContent   = fmtMYR(renoMonthly);
-  if(renoFill)  renoFill.style.width  = renoPct + "%";
-  if(renoPctEl) renoPctEl.textContent = renoPct + "% of goal";
-  if(renoGoalEl)renoGoalEl.textContent= "Goal: " + fmtMYR(renoGoal);
+  const fd=document.getElementById("f-date");if(fd&&!fd.value)fd.value=now.toISOString().split("T")[0];
+  const renoGoal=profile.renoGoal||100000,renoSaved=profile.renoSaved||0;
+  const renoMonthly=Math.max(0,left),renoTotal=renoSaved+renoMonthly;
+  const renoPct=Math.min(Math.round((renoTotal/renoGoal)*100),100);
+  const renoEl=document.getElementById("ov-reno-saved");if(renoEl)renoEl.textContent=fmtMYR(renoTotal);
+  const renoHint=document.getElementById("ov-reno-hint");if(renoHint)renoHint.textContent="total saved incl. this month";
+  const renoMon=document.getElementById("ov-reno-monthly");if(renoMon)renoMon.textContent=fmtMYR(renoMonthly);
+  const renoFill=document.getElementById("ov-reno-fill");if(renoFill)renoFill.style.width=renoPct+"%";
+  const renoPctEl=document.getElementById("ov-reno-pct");if(renoPctEl)renoPctEl.textContent=renoPct+"% of goal";
+  const renoGoalEl=document.getElementById("ov-reno-goal");if(renoGoalEl)renoGoalEl.textContent="Goal: "+fmtMYR(renoGoal);
 }
-
-function openForm(cat) {
+function openForm(cat){
   document.querySelectorAll(".qlog-btn").forEach(b=>b.classList.remove("sel"));
-  const b=document.getElementById("qb-"+cat); if(b) b.classList.add("sel");
-  const sel=document.getElementById("f-cat"); if(sel) sel.value=cat;
+  const b=document.getElementById("qb-"+cat);if(b)b.classList.add("sel");
+  const sel=document.getElementById("f-cat");if(sel)sel.value=cat;
   document.getElementById("add-form-title").textContent="Log: "+(CATS.find(c=>c.label===cat)?.icon||"")+" "+cat;
   document.getElementById("add-form").style.display="block";
   setTimeout(()=>document.getElementById("f-amount").focus(),100);
 }
-function hideForm() {
+function hideForm(){
   document.getElementById("add-form").style.display="none";
   document.querySelectorAll(".qlog-btn").forEach(b=>b.classList.remove("sel"));
-  document.getElementById("f-amount").value="";
-  document.getElementById("f-note").value="";
+  document.getElementById("f-amount").value="";document.getElementById("f-note").value="";
 }
-function saveExpense() {
+function saveExpense(){
   const amt=document.getElementById("f-amount").value;
-  if(!amt||isNaN(amt)||Number(amt)<=0) return;
+  if(!amt||isNaN(amt)||Number(amt)<=0)return;
   expenses.push({id:Date.now(),amount:Number(amt),cat:document.getElementById("f-cat").value,payment:document.getElementById("f-payment").value,note:document.getElementById("f-note").value,date:document.getElementById("f-date").value});
-  save("dev_expenses",expenses); hideForm(); renderOverview(); toast("Expense saved ✓");
+  save("dev_expenses",expenses);hideForm();renderOverview();toast("Expense saved ✓");
 }
-
-// ══════════════════════════════════════════════════════════════════════
-// AIRBNB INCOME
-// ══════════════════════════════════════════════════════════════════════
-function airbnbMonthKey() {
-  const n=new Date(); return `airbnb_${n.getFullYear()}_${n.getMonth()}`;
-}
-function getAirbnbIncome(m, y) {
-  return parseFloat(load(`airbnb_${y}_${m}`, 0)) || 0;
-}
-function saveAirbnbIncome() {
-  const el = document.getElementById("airbnb-income-input");
-  const val = el ? parseFloat(el.value) || 0 : 0;
-  const n   = new Date();
-  save(`airbnb_${n.getFullYear()}_${n.getMonth()}`, val);
-  // Update TOTAL_INCOME to include actual Airbnb
-  renderExpenses();
-  renderOverview();
-  toast(`Airbnb income ${fmtMYR(val)} saved ✓`);
-}
-
-// ══════════════════════════════════════════════════════════════════════
-// EXPORT / IMPORT
-// ══════════════════════════════════════════════════════════════════════
-function exportData() {
-  const keys = ["dev_profile","dev_expenses","dev_fixed","dev_bills","dev_positions",
-                "dev_sgdrate","dev_varbills","dev_custom_bills","dev_bill_auto",
-                "dev_investments"];
-  const data = { exportDate: new Date().toISOString(), version: "1.0" };
-  // Export all localStorage keys starting with dev_ or airbnb_
-  for(let i=0; i<localStorage.length; i++) {
-    const k = localStorage.key(i);
-    if(k && (k.startsWith("dev_") || k.startsWith("airbnb_"))) {
-      try { data[k] = JSON.parse(localStorage.getItem(k)); } catch { data[k] = localStorage.getItem(k); }
-    }
-  }
-  const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement("a");
-  a.href     = url;
-  a.download = `DevFinance_backup_${new Date().toISOString().split("T")[0]}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-  toast("Data exported ✓");
-}
-
-function importData(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    try {
-      const data = JSON.parse(e.target.result);
-      if (!data.version) { toast("⚠ Invalid backup file"); return; }
-      if (!confirm(`Import backup from ${data.exportDate?.split("T")[0]}? This will overwrite your current data.`)) return;
-      Object.entries(data).forEach(([k,v]) => {
-        if (k === "exportDate" || k === "version") return;
-        localStorage.setItem(k, JSON.stringify(v));
-      });
-      // Reload app state
-      expenses   = load("dev_expenses", []);
-      fixedCom   = load("dev_fixed", DEFAULT_FIXED);
-      billsState = load("dev_bills", {});
-      profile    = load("dev_profile", {});
-      GROSS_MYR    = (profile.sgdSalary||0) * SGD_RATE;
-      TOTAL_INCOME = GROSS_MYR + (profile.airbnbIncome||0);
-      syncBillAmounts();
-      document.getElementById("setup-screen").style.display = "none";
-      document.getElementById("app-shell").style.display    = "block";
-      renderOverview();
-      renderCommitments();
-      toast("Data imported successfully ✓");
-    } catch(err) {
-      toast("⚠ Failed to import — invalid file");
-    }
-  };
-  reader.readAsText(file);
-}
-
-// ══════════════════════════════════════════════════════════════════════
-// 9. EXPENSES
-// ══════════════════════════════════════════════════════════════════════
-function renderExpenses() {
-  const mSel=document.getElementById("exp-month-sel"), ySel=document.getElementById("exp-year-sel");
-  if(!mSel||!ySel) return;
-  const m=parseInt(mSel.value), y=parseInt(ySel.value);
-  const exps=monthlyExpenses(m,y), total=exps.reduce((s,e)=>s+Number(e.amount),0);
-
-  // Airbnb income for this month
-  const airbnbThisMonth = getAirbnbIncome(m, y);
-  const airbnbInput = document.getElementById("airbnb-income-input");
-  const airbnbLogged = document.getElementById("airbnb-logged");
-  const isCurrentMonth = m === new Date().getMonth() && y === new Date().getFullYear();
-  if(airbnbInput && isCurrentMonth) airbnbInput.value = airbnbThisMonth || "";
-  if(airbnbLogged) airbnbLogged.textContent = fmtMYR(airbnbThisMonth);
-  // Net cashflow = salary MYR + airbnb actual - total spent
-  const salaryMYR    = (profile.sgdSalary||0) * SGD_RATE;
-  const totalIncomeM = salaryMYR + airbnbThisMonth;
-  const netCashflow  = totalIncomeM - total;
-  const ncEl = document.getElementById("exp-net-cashflow");
-  const tiEl = document.getElementById("exp-total-income");
-  if(tiEl) tiEl.textContent = fmtMYR(totalIncomeM);
-  if(ncEl) { ncEl.textContent = fmtMYR(Math.abs(netCashflow)); ncEl.style.color = netCashflow>=0?"var(--green)":"var(--red)"; }
+function renderExpenses(){
+  const mSel=document.getElementById("exp-month-sel"),ySel=document.getElementById("exp-year-sel");
+  if(!mSel||!ySel)return;
+  const m=parseInt(mSel.value),y=parseInt(ySel.value);
+  const exps=monthlyExpenses(m,y),total=exps.reduce((s,e)=>s+Number(e.amount),0);
   const catTotals=CATS.map(c=>({...c,total:exps.filter(e=>e.cat===c.label).reduce((s,e)=>s+Number(e.amount),0)})).filter(c=>c.total>0).sort((a,b)=>b.total-a.total);
   const catList=document.getElementById("exp-cat-list");
-  catList.innerHTML=catTotals.length===0?'<div style="color:var(--text4);font-size:13px;padding:8px 0">No data for this period.</div>':catTotals.map(c=>{const pct=total>0?Math.round((c.total/total)*100):0;return`<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px;font-weight:500">${c.icon} ${c.label}</span><span style="font-size:12px;font-weight:700;font-family:'DM Mono',monospace">${fmtMYR(c.total)} <span style="color:var(--text4);font-weight:400">(${pct}%)</span></span></div><div class="progress-track"><div class="progress-fill" style="width:${pct}%;background:${c.color}"></div></div></div>`;}).join("");
+  catList.innerHTML=catTotals.length===0?'<div style="color:var(--text4);font-size:13px;padding:8px 0">No data.</div>':catTotals.map(c=>{const pct=total>0?Math.round((c.total/total)*100):0;return`<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px;font-weight:500">${c.icon} ${c.label}</span><span style="font-size:12px;font-weight:700;font-family:'DM Mono',monospace">${fmtMYR(c.total)} <span style="color:var(--text4);font-weight:400">(${pct}%)</span></span></div><div class="progress-track"><div class="progress-fill" style="width:${pct}%;background:${c.color}"></div></div></div>`;}).join("");
   const ctx=document.getElementById("pie-chart").getContext("2d");
-  if(pieChart) pieChart.destroy();
-  if(catTotals.length>0) pieChart=new Chart(ctx,{type:"doughnut",data:{labels:catTotals.map(c=>c.icon+" "+c.label),datasets:[{data:catTotals.map(c=>c.total),backgroundColor:catTotals.map(c=>c.color),borderWidth:2,borderColor:"#fff"}]},options:{responsive:true,plugins:{legend:{position:"bottom",labels:{font:{size:10},padding:8,color:"#64748b"}}}}});
+  if(pieChart)pieChart.destroy();
+  if(catTotals.length>0)pieChart=new Chart(ctx,{type:"doughnut",data:{labels:catTotals.map(c=>c.icon+" "+c.label),datasets:[{data:catTotals.map(c=>c.total),backgroundColor:catTotals.map(c=>c.color),borderWidth:2,borderColor:"#fff"}]},options:{responsive:true,plugins:{legend:{position:"bottom",labels:{font:{size:10},padding:8,color:"#64748b"}}}}});
   const list=document.getElementById("exp-list");
   const sorted=[...exps].sort((a,b)=>new Date(b.date)-new Date(a.date));
   list.innerHTML=sorted.length===0?'<div style="color:var(--text4);font-size:13px;padding:16px 0;text-align:center">No expenses for this period.</div>':sorted.map(e=>{const cat=CATS.find(c=>c.label===e.cat)||{icon:"📌"};return`<div class="exp-item"><div><div class="exp-cat">${cat.icon} ${e.cat}${e.note?` <span style="color:var(--text4)">— ${e.note}</span>`:""}</div><div class="exp-note">${e.date}${e.payment?" · "+e.payment:""}</div></div><div style="display:flex;align-items:center"><span class="exp-amount">−${fmtMYR(Number(e.amount))}</span><button class="del-btn" onclick="deleteExp(${e.id})">×</button></div></div>`;}).join("");
 }
-function deleteExp(id) { expenses=expenses.filter(e=>e.id!==id); save("dev_expenses",expenses); renderExpenses(); renderOverview(); toast("Deleted"); }
-
-// ══════════════════════════════════════════════════════════════════════
-// 10. COMMITMENTS
-// ══════════════════════════════════════════════════════════════════════
-function renderCommitments() {
+function deleteExp(id){expenses=expenses.filter(e=>e.id!==id);save("dev_expenses",expenses);renderExpenses();renderOverview();toast("Deleted");}
+function renderCommitments(){
   const tot=totalFixed();
   document.getElementById("cm-total").textContent=fmtMYR(tot);
   document.getElementById("cm-pct").textContent=TOTAL_INCOME>0?Math.round((tot/TOTAL_INCOME)*100)+"%":"—";
   const list=document.getElementById("commit-list");
   list.innerHTML=fixedCom.map((f,i)=>{
-    const billId=LABEL_TO_BILL[f.label], billSt=billId?getBillState(billId):null, billDef=billId?BILL_DEFS.find(d=>d.id===billId):null;
-    const isPaid=billSt?.paid||billDef?.auto, isAuto=billDef?.auto;
+    const billId=LABEL_TO_BILL[f.label],billSt=billId?getBillState(billId):null,billDef=billId?BILL_DEFS.find(d=>d.id===billId):null;
+    const isPaid=billSt?.paid||billDef?.auto,isAuto=billDef?.auto;
     const badge=isAuto?`<span class="badge badge-indigo" style="font-size:8px">AUTO</span>`:isPaid?`<span class="badge badge-green" style="font-size:8px">PAID</span>`:`<span class="badge badge-amber" style="font-size:8px">UNPAID</span>`;
     return`<div class="commit-row"><div style="flex:1"><span class="commit-label">${f.label}</span><div style="margin-top:2px">${badge}</div></div><div class="commit-right"><span class="commit-val" id="cv-${i}">${fmtMYR(f.amount)}</span><input class="commit-edit" id="ce-${i}" type="number" value="${f.amount}" onblur="saveFixed(${i})" onkeydown="if(event.key==='Enter')saveFixed(${i})"/><button class="commit-edit-btn" onclick="toggleEdit(${i})">✏️</button></div></div>`;
   }).join("");
-  const tnbSt=getBillState("tnb"), waterSt=getBillState("water");
+  const tnbSt=getBillState("tnb"),waterSt=getBillState("water");
   list.innerHTML+=`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)"><div class="label-xs" style="margin-bottom:8px">Variable Utilities (from Bills)</div><div class="commit-row"><div><span class="commit-label">⚡ TNB</span><div style="margin-top:2px">${tnbSt.paid?'<span class="badge badge-green" style="font-size:8px">PAID</span>':'<span class="badge badge-amber" style="font-size:8px">UNPAID</span>'}</div></div><span class="commit-val">${tnbSt.amount?fmtMYR(tnbSt.amount):"Not set"}</span></div><div class="commit-row" style="border:none"><div><span class="commit-label">💧 Water</span><div style="margin-top:2px">${waterSt.paid?'<span class="badge badge-green" style="font-size:8px">PAID</span>':'<span class="badge badge-amber" style="font-size:8px">UNPAID</span>'}</div></div><span class="commit-val">${waterSt.amount?fmtMYR(waterSt.amount):"Not set"}</span></div></div>`;
 }
-function toggleEdit(i) { const val=document.getElementById("cv-"+i),inp=document.getElementById("ce-"+i); if(inp.style.display==="inline-block") saveFixed(i); else{val.style.display="none";inp.style.display="inline-block";inp.focus();inp.select();} }
-function saveFixed(i) {
-  const inp=document.getElementById("ce-"+i); fixedCom[i].amount=parseFloat(inp.value)||0; save("dev_fixed",fixedCom);
-  document.getElementById("cv-"+i).textContent=fmtMYR(fixedCom[i].amount); document.getElementById("cv-"+i).style.display="inline"; inp.style.display="none";
-  syncBillAmounts(); renderCommitments(); toast("Updated ✓");
+function toggleEdit(i){const val=document.getElementById("cv-"+i),inp=document.getElementById("ce-"+i);if(inp.style.display==="inline-block")saveFixed(i);else{val.style.display="none";inp.style.display="inline-block";inp.focus();inp.select();}}
+function saveFixed(i){
+  const inp=document.getElementById("ce-"+i);fixedCom[i].amount=parseFloat(inp.value)||0;save("dev_fixed",fixedCom);
+  document.getElementById("cv-"+i).textContent=fmtMYR(fixedCom[i].amount);document.getElementById("cv-"+i).style.display="inline";inp.style.display="none";
+  syncBillAmounts();renderCommitments();toast("Updated ✓");
 }
-
-// ══════════════════════════════════════════════════════════════════════
-// 11. WEALTH
-// ══════════════════════════════════════════════════════════════════════
-function renderWealth() {
-  const datoOnnLoan  = profile.datoOnnLoan  || 1557357;
-  const ipohLoan     = profile.ipohLoan     || 418063;
-  const datoOnnVal   = profile.datoOnnVal   || 0;
-  const ipohVal      = profile.ipohVal      || 0;
-  const datoOnnEquity = datoOnnVal > 0 ? datoOnnVal - datoOnnLoan : null;
-  const ipohEquity    = ipohVal   > 0 ? ipohVal   - ipohLoan  : null;
-
-  const wealthItems = [
-    { label:"SGD Savings",         val:profile.sgdSavings,  note:"Move to DBS Multiplier — up to 4.1% p.a., no lock-in", color:"var(--amber)" },
-    { label:"Moomoo Portfolio",    val:profile.moomooPort,  note:"Update monthly from Moomoo",    color:"var(--green)" },
-    { label:"Moomoo Cash",         val:profile.moomooCash,  note:"Withdrawable",                  color:"var(--green)" },
+function renderWealth(){
+  const datoOnnLoan=profile.datoOnnLoan||1557357,ipohLoan=profile.ipohLoan||418063;
+  const datoOnnVal=profile.datoOnnVal||0,ipohVal=profile.ipohVal||0;
+  const datoOnnEquity=datoOnnVal>0?datoOnnVal-datoOnnLoan:null;
+  const ipohEquity=ipohVal>0?ipohVal-ipohLoan:null;
+  const wealthItems=[
+    {label:"SGD Savings",val:profile.sgdSavings,note:"Move to DBS Multiplier — up to 4.1% p.a.",color:"var(--amber)"},
+    {label:"Moomoo Portfolio",val:profile.moomooPort,note:"Update monthly from Moomoo",color:"var(--green)"},
+    {label:"Moomoo Cash",val:profile.moomooCash,note:"Withdrawable",color:"var(--green)"},
   ];
-  // Load actual named positions
-  const positions = load("dev_positions", [
-    { label:"VOO (S&P 500)", units:"3.84",  costUSD:648.42, currUSD:681.95 },
-    { label:"QQQM",          units:"0",     costUSD:0,      currUSD:0      },
-    { label:"SMH",           units:"0",     costUSD:0,      currUSD:0      },
-    { label:"SpaceX (SPCX)", units:"10",    costUSD:150.00, currUSD:160.95 },
-    { label:"NVDA",          units:"1",     costUSD:126.50, currUSD:205.19 },
+  const positions=load("dev_positions",[
+    {label:"VOO (S&P 500)",units:"3.84",costUSD:648.42,currUSD:681.95},
+    {label:"SpaceX (SPCX)",units:"10",costUSD:150.00,currUSD:160.95},
+    {label:"NVDA",units:"1",costUSD:126.50,currUSD:205.19},
   ]);
-  const sgdRate = SGD_RATE || 3.15;
-  const totalTracked = wealthItems.filter(w=>w.val!=null).reduce((s,w)=>s+w.val,0);
-  const totalEquity  = (datoOnnEquity||0) + (ipohEquity||0);
-  const grandTotal   = totalTracked + Math.max(0, totalEquity);
-
-  document.getElementById("wealth-liquid").textContent  = fmtMYR(totalTracked);
-  document.getElementById("wealth-total-label").textContent = "Tracked Assets: "+fmtMYR(totalTracked);
-
-  document.getElementById("wealth-assets").innerHTML =
+  const sgdRate=SGD_RATE||3.15;
+  const totalTracked=wealthItems.filter(w=>w.val!=null).reduce((s,w)=>s+w.val,0);
+  const grandTotal=totalTracked+Math.max(0,(datoOnnEquity||0)+(ipohEquity||0));
+  document.getElementById("wealth-liquid").textContent=fmtMYR(totalTracked);
+  document.getElementById("wealth-total-label").textContent="Tracked Assets: "+fmtMYR(totalTracked);
+  document.getElementById("wealth-assets").innerHTML=
     `<div class="label-xs" style="margin-bottom:10px">Liquid & Investment Assets</div>`+
     wealthItems.map(w=>`<div class="wealth-row"><div><div class="wealth-label">${w.label}</div><div class="wealth-note">${w.note}</div></div><div class="wealth-val" style="color:${w.color}">${w.val==null?"—":fmtMYR(w.val)}</div></div>`).join("")+
-
     `<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
       <div class="label-xs" style="margin-bottom:10px">Properties — Equity Position</div>
-
-      <!-- Dato Onn -->
-      <div class="wealth-row">
-        <div>
-          <div class="wealth-label">🏗️ Dato Onn</div>
-          <div class="wealth-note">Loan: ${fmtMYR(datoOnnLoan)} · Purchase: RM 1.69M · Under construction</div>
-        </div>
-        <div style="text-align:right">
-          ${datoOnnVal>0
-            ? `<div class="wealth-val" style="color:${datoOnnEquity>=0?'var(--green)':'var(--red)'}">${fmtMYR(datoOnnEquity)}</div>
-               <div class="wealth-note">Val: ${fmtMYR(datoOnnVal)}</div>`
-            : `<div style="font-size:11px;color:var(--text4)">Enter valuation<br/>in Edit Profile</div>`
-          }
-        </div>
-      </div>
-
-      <!-- Ipoh -->
-      <div class="wealth-row" style="border:none">
-        <div>
-          <div class="wealth-label">🏠 Ipoh Airbnb</div>
-          <div class="wealth-note">Loan: ${fmtMYR(ipohLoan)} · Monthly: RM 1,919 · Active</div>
-        </div>
-        <div style="text-align:right">
-          ${ipohVal>0
-            ? `<div class="wealth-val" style="color:${ipohEquity>=0?'var(--green)':'var(--red)'}">${fmtMYR(ipohEquity)}</div>
-               <div class="wealth-note">Val: ${fmtMYR(ipohVal)}</div>`
-            : `<div style="font-size:11px;color:var(--text4)">Enter valuation<br/>in Edit Profile</div>`
-          }
-        </div>
-      </div>
-
-      <!-- Total net worth -->
+      <div class="wealth-row"><div><div class="wealth-label">🏗️ Dato Onn</div><div class="wealth-note">Loan: ${fmtMYR(datoOnnLoan)} · Purchase: RM 1.69M · Under construction</div></div>
+      <div style="text-align:right">${datoOnnVal>0?`<div class="wealth-val" style="color:${datoOnnEquity>=0?"var(--green)":"var(--red)"}">${fmtMYR(datoOnnEquity)}</div><div class="wealth-note">Val: ${fmtMYR(datoOnnVal)}</div>`:`<div style="font-size:11px;color:var(--text4)">Enter valuation<br/>in Edit Profile</div>`}</div></div>
+      <div class="wealth-row" style="border:none"><div><div class="wealth-label">🏠 Ipoh Airbnb</div><div class="wealth-note">Loan: ${fmtMYR(ipohLoan)} · Monthly: RM 1,919 · Active</div></div>
+      <div style="text-align:right">${ipohVal>0?`<div class="wealth-val" style="color:${ipohEquity>=0?"var(--green)":"var(--red)"}">${fmtMYR(ipohEquity)}</div><div class="wealth-note">Val: ${fmtMYR(ipohVal)}</div>`:`<div style="font-size:11px;color:var(--text4)">Enter valuation<br/>in Edit Profile</div>`}</div></div>
       <div style="margin-top:12px;padding:12px;background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:10px;display:flex;justify-content:space-between;align-items:center">
-        <div>
-          <div style="font-size:9px;color:rgba(255,255,255,0.6);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">Estimated Net Worth</div>
-          <div style="font-size:10px;color:rgba(255,255,255,0.4)">Assets + property equity</div>
-        </div>
+        <div><div style="font-size:9px;color:rgba(255,255,255,0.6);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">Estimated Net Worth</div><div style="font-size:10px;color:rgba(255,255,255,0.4)">Assets + property equity</div></div>
         <div style="font-size:20px;font-weight:800;color:#fff">${fmtMYR(grandTotal,true)}</div>
       </div>
     </div>`;
-
-
-function renderPositions(positions, sgdRate) {
-    return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <div class="label-xs">Portfolio Positions</div>
-      <button onclick="addPortfolioPosition()" style="background:var(--indigo3);border:1px solid var(--indigo2);border-radius:6px;color:var(--indigo);font-size:10px;font-weight:700;padding:4px 10px;cursor:pointer">+ Add ETF / Stock</button>
-    </div>`+
-    positions.map((p,i)=>{
-      const units   = parseFloat(p.units||0);
-      const currMYR = p.currUSD * units * sgdRate;
-      const costMYR = p.costUSD * units * sgdRate;
-      const gainMYR = currMYR - costMYR;
-      const gainPct = costMYR > 0 ? ((gainMYR/costMYR)*100).toFixed(1) : "0";
-      const isGain  = gainMYR >= 0;
-      return `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <div style="font-size:13px;font-weight:700;color:var(--text1)">${p.label}</div>
-          <div style="display:flex;gap:6px;align-items:center">
-            <span class="badge ${isGain?"badge-green":"badge-red"}">${isGain?"+":""}${gainPct}%</span>
-            <button onclick="removePosition(${i})" style="background:var(--red2);border:none;border-radius:4px;color:var(--red);font-size:10px;font-weight:700;padding:2px 6px;cursor:pointer">✕</button>
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
-          <div><div style="font-size:9px;color:var(--text4);margin-bottom:3px">Units</div>
-            <input type="number" value="${p.units||0}" inputmode="decimal" style="width:100%;padding:5px 7px;background:#fff;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Mono',monospace;outline:none" onchange="updatePosition(${i},'units',this.value)"/></div>
-          <div><div style="font-size:9px;color:var(--text4);margin-bottom:3px">Avg Cost USD</div>
-            <input type="number" value="${p.costUSD||0}" inputmode="decimal" style="width:100%;padding:5px 7px;background:#fff;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Mono',monospace;outline:none" onchange="updatePosition(${i},'costUSD',parseFloat(this.value)||0)"/></div>
-          <div><div style="font-size:9px;color:var(--text4);margin-bottom:3px">Current USD</div>
-            <input type="number" value="${p.currUSD||0}" inputmode="decimal" style="width:100%;padding:5px 7px;background:#fff;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Mono',monospace;outline:none" onchange="updatePosition(${i},'currUSD',parseFloat(this.value)||0)"/></div>
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
-          <span style="font-size:11px;color:var(--text3)">MYR Value</span>
-          <span style="font-size:13px;font-weight:700;font-family:'DM Mono',monospace;color:var(--indigo)">${fmtMYR(currMYR)}</span>
-        </div>
-      </div>`;
+  document.getElementById("wealth-investments").innerHTML=
+    `<div class="label-xs" style="margin-bottom:10px">Portfolio Positions</div>`+
+    positions.map(p=>{
+      const currMYR=p.currUSD*parseFloat(p.units)*sgdRate,costMYR=p.costUSD*parseFloat(p.units)*sgdRate;
+      const gainMYR=currMYR-costMYR,gainPct=costMYR>0?((gainMYR/costMYR)*100).toFixed(1):"0",isGain=gainMYR>=0;
+      return`<div class="wealth-row"><div><div class="wealth-label">${p.label}</div><div class="wealth-note">${p.units} units · USD ${p.currUSD} · Cost USD ${p.costUSD}</div></div><div style="text-align:right"><div class="wealth-val">${fmtMYR(currMYR)}</div><span class="badge ${isGain?"badge-green":"badge-red"}" style="margin-top:3px;display:inline-block">${isGain?"+":""}${gainPct}%</span></div></div>`;
     }).join("")+
-    `<div style="padding:10px 0;display:flex;justify-content:space-between;border-top:1px solid var(--border)">
-      <span style="font-size:12px;font-weight:600;color:var(--text2)">Total Portfolio (MYR)</span>
-      <span style="font-size:14px;font-weight:800;font-family:'DM Mono',monospace;color:var(--indigo)">${fmtMYR(positions.reduce((s,p)=>s+(p.currUSD*parseFloat(p.units||0)*sgdRate),0))}</span>
-    </div>`;
+    `<div style="padding:12px 0 0;border-top:1px solid var(--border);margin-top:8px;display:flex;justify-content:space-between"><span style="font-size:12px;color:var(--text3)">SGD/MYR rate used</span><span style="font-size:12px;font-weight:700;font-family:'DM Mono',monospace">${sgdRate.toFixed(4)}</span></div>`;
 }
-
-// ══════════════════════════════════════════════════════════════════════
-// PORTFOLIO MANAGEMENT
-// ══════════════════════════════════════════════════════════════════════
-function updatePosition(idx, field, value) {
-  const positions = load("dev_positions", []);
-  if (!positions[idx]) return;
-  positions[idx][field] = field === 'units' ? value : parseFloat(value)||0;
-  save("dev_positions", positions);
-  renderWealth();
-}
-
-function removePosition(idx) {
-  const positions = load("dev_positions", []);
-  positions.splice(idx, 1);
-  save("dev_positions", positions);
-  renderWealth();
-  toast("Position removed");
-}
-
-function addPortfolioPosition() {
-  const label = prompt("Ticker / Name (e.g. QQQM, SMH):");
-  if (!label || !label.trim()) return;
-  const positions = load("dev_positions", []);
-  positions.push({ label: label.trim().toUpperCase(), units: "0", costUSD: 0, currUSD: 0 });
-  save("dev_positions", positions);
-  renderWealth();
-  toast("Position added — enter your units and prices");
-}
-
-// ══════════════════════════════════════════════════════════════════════
-// 12. ANALYZER
-// ══════════════════════════════════════════════════════════════════════
-function project(start,monthly,years,rate) {
-  const r = rate || MONTHLY_RETURN_10;
-  let v=start; const pts=[{y:0,val:Math.round(v)}];
-  for(let yr=1;yr<=years;yr++){for(let m=0;m<12;m++) v=v*(1+r)+monthly; pts.push({y:yr,val:Math.round(v)});}
+function project(start,monthly,years,rate){
+  const r=rate||MONTHLY_RETURN_10;let v=start;const pts=[{y:0,val:Math.round(v)}];
+  for(let yr=1;yr<=years;yr++){for(let m=0;m<12;m++)v=v*(1+r)+monthly;pts.push({y:yr,val:Math.round(v)});}
   return pts;
 }
-function monthsToGoal(start,monthly,goal,rate) {
-  const r=rate||MONTHLY_RETURN_10; let v=start,m=0;
-  while(v<goal&&m<600){v=v*(1+r)+monthly;m++;} return m;
-}
-function requiredMonthly(start,goal,years,rate) {
-  const r=rate||MONTHLY_RETURN_10,n=years*12,fv=start*Math.pow(1+r,n);
-  return Math.max(0,Math.round((goal-fv)/((Math.pow(1+r,n)-1)/r)));
-}
-
-function renderAnalyzer() {
-  const cp=profile.currentPort||0, vm=profile.vooMonthly||0, yrs=profile.years||20;
-  const g1=profile.goal1||1000000, g2=profile.goal2||3000000, g3=profile.goal3||5000000;
-
-  // Verify calculation inline for debugging
-  const base8  = project(cp,vm,yrs,MONTHLY_RETURN_8);
-  const base10 = project(cp,vm,yrs,MONTHLY_RETURN_10);
-  const base12 = project(cp,vm,yrs,MONTHLY_RETURN_12);
-  const final8=base8[yrs].val, final10=base10[yrs].val, final12=base12[yrs].val;
-
-  // Show 3-rate projection card
-  document.getElementById("proj-final").innerHTML = `
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:4px">
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center">
-        <div style="font-size:9px;color:var(--text4);font-weight:700;letter-spacing:1px;margin-bottom:4px">8% p.a.</div>
-        <div style="font-size:14px;font-weight:800;color:var(--text2);font-family:'DM Mono',monospace">${fmtMYR(final8,true)}</div>
-      </div>
-      <div style="background:var(--indigo3);border:1px solid var(--indigo2);border-radius:10px;padding:10px;text-align:center">
-        <div style="font-size:9px;color:var(--indigo);font-weight:700;letter-spacing:1px;margin-bottom:4px">10% p.a.</div>
-        <div style="font-size:14px;font-weight:800;color:var(--indigo);font-family:'DM Mono',monospace">${fmtMYR(final10,true)}</div>
-      </div>
-      <div style="background:var(--green2);border:1px solid #6ee7b7;border-radius:10px;padding:10px;text-align:center">
-        <div style="font-size:9px;color:var(--green);font-weight:700;letter-spacing:1px;margin-bottom:4px">12% p.a.</div>
-        <div style="font-size:14px;font-weight:800;color:var(--green);font-family:'DM Mono',monospace">${fmtMYR(final12,true)}</div>
-      </div>
-    </div>
-    <div style="font-size:10px;color:var(--text4);margin-top:8px;font-family:'DM Mono',monospace">Starting: ${fmtMYR(cp)} · Investing: ${fmtMYR(vm)}/month · ${yrs} years</div>`;
-
-  // Milestones at 10%
-  const goals=[
-    {label:fmtMYR(g1,true),goal:g1,color:"var(--green)"},
-    {label:fmtMYR(g2,true),goal:g2,color:"var(--amber)"},
-    {label:fmtMYR(g3,true),goal:g3,color:"var(--red)"},
-  ];
-  document.getElementById("milestone-list").innerHTML=goals.map(g=>{
-    const m=monthsToGoal(cp,vm,g.goal,MONTHLY_RETURN_10),req=requiredMonthly(cp,g.goal,yrs,MONTHLY_RETURN_10),ok=m<=yrs*12;
-    return`<div class="milestone" style="border-left:3px solid ${g.color}"><div><div class="milestone-goal" style="color:${g.color}">${g.label}</div><div class="milestone-eta">${ok?`In ${Math.floor(m/12)}y ${m%12}m @ 10%`:`Beyond ${yrs}yr at current rate`}</div></div><div class="milestone-req"><div class="milestone-req-label">Need/month</div><div class="milestone-req-val" style="color:${req<=vm?"var(--green)":"var(--red)"}">RM ${req.toLocaleString()}</div></div></div>`;
-  }).join("");
-
-  // Chart with all 3 lines
-  const chartPts=base10.filter((_,i)=>i%2===0||i===yrs);
-  const chartPts8=base8.filter((_,i)=>i%2===0||i===yrs);
-  const chartPts12=base12.filter((_,i)=>i%2===0||i===yrs);
+function monthsToGoal(start,monthly,goal,rate){const r=rate||MONTHLY_RETURN_10;let v=start,m=0;while(v<goal&&m<600){v=v*(1+r)+monthly;m++;}return m;}
+function requiredMonthly(start,goal,years,rate){const r=rate||MONTHLY_RETURN_10,n=years*12,fv=start*Math.pow(1+r,n);return Math.max(0,Math.round((goal-fv)/((Math.pow(1+r,n)-1)/r)));}
+function renderAnalyzer(){
+  const cp=profile.currentPort||0,vm=profile.vooMonthly||0,yrs=profile.years||20;
+  const g1=profile.goal1||1000000,g2=profile.goal2||3000000,g3=profile.goal3||5000000;
+  const base8=project(cp,vm,yrs,MONTHLY_RETURN_8),base10=project(cp,vm,yrs,MONTHLY_RETURN_10),base12=project(cp,vm,yrs,MONTHLY_RETURN_12);
+  const final8=base8[yrs].val,final10=base10[yrs].val,final12=base12[yrs].val;
+  document.getElementById("proj-final").innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:4px"><div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text4);font-weight:700;letter-spacing:1px;margin-bottom:4px">8% p.a.</div><div style="font-size:14px;font-weight:800;color:var(--text2);font-family:'DM Mono',monospace">${fmtMYR(final8,true)}</div></div><div style="background:var(--indigo3);border:1px solid var(--indigo2);border-radius:10px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--indigo);font-weight:700;letter-spacing:1px;margin-bottom:4px">10% p.a.</div><div style="font-size:14px;font-weight:800;color:var(--indigo);font-family:'DM Mono',monospace">${fmtMYR(final10,true)}</div></div><div style="background:var(--green2);border:1px solid #6ee7b7;border-radius:10px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--green);font-weight:700;letter-spacing:1px;margin-bottom:4px">12% p.a.</div><div style="font-size:14px;font-weight:800;color:var(--green);font-family:'DM Mono',monospace">${fmtMYR(final12,true)}</div></div></div><div style="font-size:10px;color:var(--text4);margin-top:8px;font-family:'DM Mono',monospace">Starting: ${fmtMYR(cp)} · Investing: ${fmtMYR(vm)}/month · ${yrs} years</div>`;
+  const goals=[{label:fmtMYR(g1,true),goal:g1,color:"var(--green)"},{label:fmtMYR(g2,true),goal:g2,color:"var(--amber)"},{label:fmtMYR(g3,true),goal:g3,color:"var(--red)"}];
+  document.getElementById("milestone-list").innerHTML=goals.map(g=>{const m=monthsToGoal(cp,vm,g.goal,MONTHLY_RETURN_10),req=requiredMonthly(cp,g.goal,yrs,MONTHLY_RETURN_10),ok=m<=yrs*12;return`<div class="milestone" style="border-left:3px solid ${g.color}"><div><div class="milestone-goal" style="color:${g.color}">${g.label}</div><div class="milestone-eta">${ok?`In ${Math.floor(m/12)}y ${m%12}m @ 10%`:`Beyond ${yrs}yr`}</div></div><div class="milestone-req"><div class="milestone-req-label">Need/month</div><div class="milestone-req-val" style="color:${req<=vm?"var(--green)":"var(--red)"}">RM ${req.toLocaleString()}</div></div></div>`;}).join("");
+  const chartPts=base10.filter((_,i)=>i%2===0||i===yrs),chartPts8=base8.filter((_,i)=>i%2===0||i===yrs),chartPts12=base12.filter((_,i)=>i%2===0||i===yrs);
   const ctx=document.getElementById("proj-chart").getContext("2d");
-  if(projChart) projChart.destroy();
-  projChart=new Chart(ctx,{
-    type:"line",
-    data:{
-      labels:chartPts.map(d=>"Y"+d.y),
-      datasets:[
-        {label:"8% p.a.",  data:chartPts8.map(d=>d.val),  borderColor:"#94a3b8",backgroundColor:"transparent",borderWidth:1.5,pointRadius:0,tension:0.4,borderDash:[4,3]},
-        {label:"10% p.a.", data:chartPts.map(d=>d.val),   borderColor:"#4f46e5",backgroundColor:"rgba(79,70,229,0.08)",borderWidth:2.5,pointRadius:2,fill:true,tension:0.4},
-        {label:"12% p.a.", data:chartPts12.map(d=>d.val), borderColor:"#059669",backgroundColor:"transparent",borderWidth:1.5,pointRadius:0,tension:0.4,borderDash:[4,3]},
-      ]
-    },
-    options:{responsive:true,plugins:{legend:{display:true,position:"bottom",labels:{font:{size:9},color:"#64748b",padding:8}},tooltip:{callbacks:{label:v=>`${v.dataset.label}: ${fmtMYR(v.raw)}`}}},scales:{y:{ticks:{callback:v=>fmtMYR(v,true),font:{size:9},color:"#94a3b8"},grid:{color:"#f1f5f9"}},x:{ticks:{font:{size:9},color:"#94a3b8"},grid:{display:false}}}}
-  });
-
+  if(projChart)projChart.destroy();
+  projChart=new Chart(ctx,{type:"line",data:{labels:chartPts.map(d=>"Y"+d.y),datasets:[{label:"8%",data:chartPts8.map(d=>d.val),borderColor:"#94a3b8",backgroundColor:"transparent",borderWidth:1.5,pointRadius:0,tension:0.4,borderDash:[4,3]},{label:"10%",data:chartPts.map(d=>d.val),borderColor:"#4f46e5",backgroundColor:"rgba(79,70,229,0.08)",borderWidth:2.5,pointRadius:2,fill:true,tension:0.4},{label:"12%",data:chartPts12.map(d=>d.val),borderColor:"#059669",backgroundColor:"transparent",borderWidth:1.5,pointRadius:0,tension:0.4,borderDash:[4,3]}]},options:{responsive:true,plugins:{legend:{display:true,position:"bottom",labels:{font:{size:9},color:"#64748b",padding:8}},tooltip:{callbacks:{label:v=>`${v.dataset.label}: ${fmtMYR(v.raw)}`}}},scales:{y:{ticks:{callback:v=>fmtMYR(v,true),font:{size:9},color:"#94a3b8"},grid:{color:"#f1f5f9"}},x:{ticks:{font:{size:9},color:"#94a3b8"},grid:{display:false}}}}});
   const req2=requiredMonthly(cp,g2,yrs,MONTHLY_RETURN_10);
   document.getElementById("gap-text").innerHTML=`At ${fmtMYR(vm)}/month @ 10%: <strong>${fmtMYR(final10,true)}</strong> in ${yrs}yrs. Need <strong>RM ${req2.toLocaleString()}/month</strong> for ${fmtMYR(g2,true)}. Gap: <strong style="color:var(--red)">RM ${(req2-vm).toLocaleString()}/month more.</strong>`;
-
-  updateWhatIf(0);
-  if(currentSubtab!=="projection") setSubtab(currentSubtab);
+  updateWhatIf(0);if(currentSubtab!=="projection")setSubtab(currentSubtab);
 }
-function updateWhatIf(extra) {
-  const cp=profile.currentPort||0,vm=profile.vooMonthly||0,yrs=profile.years||20;
-  extra=Number(extra);
+function updateWhatIf(extra){
+  const cp=profile.currentPort||0,vm=profile.vooMonthly||0,yrs=profile.years||20;extra=Number(extra);
   document.getElementById("slider-display").textContent=extra===0?"No extra":"+RM "+extra.toLocaleString();
   document.getElementById("extra-slider").value=extra;
   const grid=document.getElementById("whatif-grid");
@@ -1449,7 +755,7 @@ function updateWhatIf(extra) {
     document.getElementById("wi-boost").textContent=fmtMYR(project(cp,vm+extra,yrs,MONTHLY_RETURN_10)[yrs].val,true);
     if(projChart){
       const boosted=project(cp,vm+extra,yrs,MONTHLY_RETURN_10).filter((_,i)=>i%2===0||i===yrs);
-      if(projChart.data.datasets.length===3) projChart.data.datasets.push({label:"Boosted",data:boosted.map(d=>d.val),borderColor:"#f59e0b",backgroundColor:"transparent",borderWidth:2,borderDash:[6,3],pointRadius:0,fill:false,tension:0.4});
+      if(projChart.data.datasets.length===3)projChart.data.datasets.push({label:"Boosted",data:boosted.map(d=>d.val),borderColor:"#f59e0b",backgroundColor:"transparent",borderWidth:2,borderDash:[6,3],pointRadius:0,fill:false,tension:0.4});
       else projChart.data.datasets[3].data=boosted.map(d=>d.val);
       projChart.update();
     }
@@ -1458,20 +764,18 @@ function updateWhatIf(extra) {
     if(projChart&&projChart.data.datasets.length>3){projChart.data.datasets.splice(3);projChart.update();}
   }
 }
-function renderAnalyzerSpending() {
-  const mSel=document.getElementById("an-month-sel"),ySel=document.getElementById("an-year-sel");
-  if(!mSel||!ySel) return;
+function renderAnalyzerSpending(){
+  const mSel=document.getElementById("an-month-sel"),ySel=document.getElementById("an-year-sel");if(!mSel||!ySel)return;
   const m=parseInt(mSel.value),y=parseInt(ySel.value),exps=monthlyExpenses(m,y),total=exps.reduce((s,e)=>s+Number(e.amount),0);
   const avoidable=exps.filter(e=>AVOIDABLE.includes(e.cat)).reduce((s,e)=>s+Number(e.amount),0),potSave=Math.round(avoidable*0.5);
   document.getElementById("an-summary").innerHTML=[{label:"Total Spent",val:fmtMYR(total),color:"var(--red)"},{label:"Avoidable",val:fmtMYR(avoidable),color:"var(--amber)"},{label:"Could Save",val:fmtMYR(potSave),color:"var(--green)"},{label:"Entries",val:exps.length,color:"var(--indigo)"}].map(c=>`<div class="card-sm"><div class="label-xs">${c.label}</div><div style="font-size:15px;font-weight:700;font-family:'DM Mono',monospace;margin-top:4px;color:${c.color}">${c.val}</div></div>`).join("");
   const now=new Date(),trendData=Array.from({length:6},(_,i)=>{const d=new Date(now.getFullYear(),now.getMonth()-(5-i),1),tm=d.getMonth(),ty=d.getFullYear();return{label:MONTHS_SHORT[tm],spent:expenses.filter(e=>{const ed=new Date(e.date);return ed.getMonth()===tm&&ed.getFullYear()===ty;}).reduce((s,e)=>s+Number(e.amount),0)};});
-  const tCtx=document.getElementById("trend-chart").getContext("2d");
-  if(trendChart) trendChart.destroy();
+  const tCtx=document.getElementById("trend-chart").getContext("2d");if(trendChart)trendChart.destroy();
   trendChart=new Chart(tCtx,{type:"bar",data:{labels:trendData.map(d=>d.label),datasets:[{data:trendData.map(d=>d.spent),backgroundColor:"rgba(79,70,229,0.15)",borderColor:"#4f46e5",borderWidth:1.5,borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:v=>fmtMYR(v.raw)}}},scales:{y:{ticks:{callback:v=>fmtMYR(v,true),font:{size:9},color:"#94a3b8"},grid:{color:"#f1f5f9"}},x:{ticks:{font:{size:9},color:"#94a3b8"},grid:{display:false}}}}});
   const cats=CATS.map(c=>({...c,total:exps.filter(e=>e.cat===c.label).reduce((s,e)=>s+Number(e.amount),0)})).filter(c=>c.total>0).sort((a,b)=>b.total-a.total);
   document.getElementById("an-cat-list").innerHTML=cats.length===0?'<div style="color:var(--text4);font-size:13px;padding:8px 0">No data.</div>':cats.map(c=>{const pct=total>0?Math.round((c.total/total)*100):0,isAv=AVOIDABLE.includes(c.label);return`<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px">${c.icon} ${c.label} ${isAv?'<span class="badge badge-amber" style="font-size:8px">avoidable</span>':""}</span><span style="font-size:12px;font-weight:700;font-family:'DM Mono',monospace">${fmtMYR(c.total)} (${pct}%)</span></div><div class="progress-track"><div class="progress-fill" style="width:${pct}%;background:${isAv?"var(--amber)":c.color}"></div></div></div>`;}).join("");
 }
-function renderInsights() {
+function renderInsights(){
   const cp=profile.currentPort||0,vm=profile.vooMonthly||0,yrs=profile.years||20;
   const g1=profile.goal1||1000000,g2=profile.goal2||3000000;
   const now=new Date(),m=now.getMonth(),y=now.getFullYear(),exps=monthlyExpenses(m,y);
@@ -1479,78 +783,81 @@ function renderInsights() {
   const topCat=CATS.map(c=>({...c,total:exps.filter(e=>e.cat===c.label).reduce((s,e)=>s+Number(e.amount),0)})).sort((a,b)=>b.total-a.total)[0];
   const req2=requiredMonthly(cp,g2,yrs),finalBase=project(cp,vm,yrs)[yrs].val,m1=monthsToGoal(cp,vm,g1);
   const insights=[];
-  if(topCat&&topCat.total>0) insights.push({type:"warn",label:"⚠ Watch This",text:`Biggest spend: ${topCat.icon} ${topCat.label} at ${fmtMYR(topCat.total)}.`});
-  if(avoidable>0) insights.push({type:"cut",label:"✂ Could Cut",text:`${fmtMYR(avoidable)} on Entertainment, Shopping & Other. Halving = ${fmtMYR(potSave)}/month freed.`});
-  if(potSave>300) insights.push({type:"invest",label:"📈 Redirect to Wealth",text:`Moving ${fmtMYR(potSave)} to VOO monthly → portfolio hits ${fmtMYR(project(cp,vm+potSave,yrs)[yrs].val,true)} in ${yrs}yr.`});
+  if(topCat&&topCat.total>0)insights.push({type:"warn",label:"⚠ Watch This",text:`Biggest spend: ${topCat.icon} ${topCat.label} at ${fmtMYR(topCat.total)}.`});
+  if(avoidable>0)insights.push({type:"cut",label:"✂ Could Cut",text:`${fmtMYR(avoidable)} on Entertainment, Shopping & Other. Halving = ${fmtMYR(potSave)}/month freed.`});
+  if(potSave>300)insights.push({type:"invest",label:"📈 Redirect to Wealth",text:`Moving ${fmtMYR(potSave)} to VOO monthly → ${fmtMYR(project(cp,vm+potSave,yrs)[yrs].val,true)} in ${yrs}yr.`});
   insights.push({type:"gap",label:"🎯 Goal Gap",text:`At ${fmtMYR(vm)}/month: ${fmtMYR(g1,true)} in ${Math.floor(m1/12)}y ${m1%12}m. Need RM ${req2.toLocaleString()}/month for ${fmtMYR(g2,true)}.`});
   const ic={warn:"var(--amber)",cut:"var(--red)",invest:"var(--green)",gap:"var(--indigo)"},ib={warn:"var(--amber2)",cut:"var(--red2)",invest:"var(--green2)",gap:"var(--indigo3)"};
   document.getElementById("insights-list").innerHTML=insights.map(i=>`<div style="background:${ib[i.type]};border:1px solid;border-left:3px solid ${ic[i.type]};border-color:${ic[i.type]}44;border-radius:12px;padding:14px;margin-bottom:10px"><div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:${ic[i.type]};margin-bottom:5px">${i.label}</div><div style="font-size:12px;color:var(--text2);line-height:1.7">${i.text}</div></div>`).join("");
   document.getElementById("improve-list").innerHTML=[
-    {label:"Redirect avoidable spend to VOO",           impact:potSave>0?`+${fmtMYR(potSave)}/month`:"Log expenses first",                                              color:"var(--green)"},
-    {label:"Move SGD savings to DBS Multiplier",        impact:"Up to 4.1% p.a., no lock-in, salary already credits",                                                    color:"var(--indigo)"},
-    {label:"Optimize Ipoh Airbnb occupancy",            impact:"RM 600–1,500/month potential",                                                                            color:"var(--amber)"},
-    {label:`Increase investment by RM ${(req2-vm).toLocaleString()}`, impact:`→ ${fmtMYR(project(cp,vm+(req2-vm),yrs,MONTHLY_RETURN_10)[yrs].val,true)} in ${yrs}yr`,   color:"var(--purple)"},
+    {label:"Redirect avoidable spend to VOO",impact:potSave>0?`+${fmtMYR(potSave)}/month`:"Log expenses first",color:"var(--green)"},
+    {label:"Move SGD savings to DBS Multiplier",impact:"Up to 4.1% p.a., no lock-in",color:"var(--indigo)"},
+    {label:"Optimize Ipoh Airbnb occupancy",impact:"RM 600–1,500/month potential",color:"var(--amber)"},
+    {label:`Increase investment by RM ${(req2-vm).toLocaleString()}`,impact:`→ ${fmtMYR(project(cp,vm+(req2-vm),yrs,MONTHLY_RETURN_10)[yrs].val,true)} in ${yrs}yr`,color:"var(--purple)"},
   ].map(item=>`<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border)"><span style="font-size:12px;color:var(--text2);flex:1;padding-right:10px">${item.label}</span><span style="font-size:11px;color:${item.color};text-align:right;min-width:110px;font-weight:600">${item.impact}</span></div>`).join("");
   const health=[
-    {label:"Consistency",     score:vm>=2000?7:5,                    note:`${fmtMYR(vm)}/month invested`},
-    {label:"Diversification", score:5,                                note:"VOO-heavy — consider diversifying"},
-    {label:"Goal Alignment",  score:finalBase>=g1?7:4,               note:finalBase>=g1?"On track for first goal":"Below target pace"},
-    {label:"Cash Efficiency", score:profile.sgdSavings>50000?4:6,    note:profile.sgdSavings>50000?"Move to DBS Multiplier for 4.1% p.a.":"Cash position healthy"},
-    {label:"Income Leverage", score:6,                                note:"Salary strong, Airbnb developing"},
+    {label:"Consistency",score:vm>=2000?7:5,note:`${fmtMYR(vm)}/month invested`},
+    {label:"Diversification",score:5,note:"VOO-heavy — consider diversifying"},
+    {label:"Goal Alignment",score:finalBase>=g1?7:4,note:finalBase>=g1?"On track for first goal":"Below target pace"},
+    {label:"Cash Efficiency",score:profile.sgdSavings>50000?4:6,note:profile.sgdSavings>50000?"Move to DBS Multiplier for 4.1% p.a.":"Cash position healthy"},
+    {label:"Income Leverage",score:6,note:"Salary strong, Airbnb developing"},
   ];
   document.getElementById("health-list").innerHTML=`<div class="label-xs" style="margin-bottom:14px">Investment Health Score</div>`+health.map(h=>{const c=h.score>=7?"var(--green)":h.score>=5?"var(--amber)":"var(--red)";return`<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:12px;font-weight:500">${h.label}</span><span style="font-size:12px;font-weight:800;font-family:'DM Mono',monospace;color:${c}">${h.score}/10</span></div><div class="progress-track"><div class="progress-fill" style="width:${h.score*10}%;background:${c}"></div></div><div style="font-size:10px;color:var(--text4);margin-top:3px">${h.note}</div></div>`;}).join("");
 }
-
-// ══════════════════════════════════════════════════════════════════════
-// 13. BILLS
-// ══════════════════════════════════════════════════════════════════════
-const PAYMENT_METHODS = [
-  { value:"CC UOB",       label:"UOB PRVI Miles",  sub:"Credit Card", svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#003087"/><text x="20" y="26" text-anchor="middle" font-size="13" font-weight="900" fill="#fff" font-family="sans-serif">UOB</text></svg>` },
-  { value:"CC CIMB",      label:"CIMB",            sub:"Credit Card", svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#C8102E"/><text x="20" y="27" text-anchor="middle" font-size="10" font-weight="900" fill="#fff" font-family="sans-serif">CIMB</text></svg>` },
-  { value:"QR Maybank",   label:"Maybank",         sub:"QR Pay",      svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#FFCC00"/><text x="20" y="27" text-anchor="middle" font-size="8" font-weight="900" fill="#1a1a1a" font-family="sans-serif">Maybank</text></svg>` },
-  { value:"QR Ambank",    label:"AmBank",          sub:"QR Pay",      svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#E4002B"/><text x="20" y="27" text-anchor="middle" font-size="8" font-weight="900" fill="#fff" font-family="sans-serif">AmBank</text></svg>` },
-  { value:"QR CIMB",      label:"CIMB",            sub:"QR Pay",      svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#C8102E"/><text x="20" y="27" text-anchor="middle" font-size="10" font-weight="900" fill="#fff" font-family="sans-serif">CIMB</text></svg>` },
-  { value:"TnG",          label:"Touch & Go",      sub:"eWallet",     svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#00A0E3"/><text x="20" y="24" text-anchor="middle" font-size="11" font-weight="900" fill="#fff" font-family="sans-serif">TnG</text></svg>` },
-  { value:"Debit Card",   label:"Debit Card",      sub:"Any bank",    svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#64748b"/><rect x="6" y="13" width="28" height="18" rx="3" fill="none" stroke="#fff" stroke-width="2"/><rect x="6" y="19" width="28" height="5" fill="#fff" opacity="0.4"/></svg>` },
-  { value:"Bank Transfer",label:"Bank Transfer",   sub:"Online",      svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#0ea5e9"/><text x="20" y="25" text-anchor="middle" font-size="20" fill="#fff" font-family="sans-serif">🏦</text></svg>` },
-  { value:"Cash",         label:"Cash",            sub:"Physical",    svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#059669"/><text x="20" y="25" text-anchor="middle" font-size="20" fill="#fff" font-family="sans-serif">💵</text></svg>` },
-];
-
-const BRAND_SVGS = {
-  youtube: `<svg viewBox="0 0 24 24" width="SIZE" height="SIZE"><path fill="#FF0000" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8z"/><path fill="#fff" d="M9.6 15.6V8.4l6.2 3.6-6.2 3.6z"/></svg>`,
-  claude:  `<svg viewBox="0 0 24 24" width="SIZE" height="SIZE"><rect width="24" height="24" rx="6" fill="#D4B896"/><text x="12" y="17" text-anchor="middle" font-size="13" font-weight="700" fill="#1a1a1a" font-family="serif">C</text></svg>`,
-  icloud:  `<svg viewBox="0 0 24 24" width="SIZE" height="SIZE"><rect width="24" height="24" rx="6" fill="#3478F6"/><path fill="#fff" d="M17.5 10.2a5 5 0 0 0-9.8 1.3A3.5 3.5 0 0 0 8 18h9a3 3 0 0 0 .5-6z"/></svg>`,
-  mazda:   `<svg viewBox="0 0 24 24" width="SIZE" height="SIZE"><rect width="24" height="24" rx="6" fill="#1a1a1a"/><ellipse cx="12" cy="12" rx="7" ry="5" fill="none" stroke="#fff" stroke-width="1.5"/><ellipse cx="12" cy="12" rx="3.5" ry="5" fill="none" stroke="#fff" stroke-width="1.5"/></svg>`,
-  aia:     `<svg viewBox="0 0 24 24" width="SIZE" height="SIZE"><rect width="24" height="24" rx="6" fill="#E4002B"/><text x="12" y="16" text-anchor="middle" font-size="9" font-weight="900" fill="#fff" font-family="sans-serif">AIA</text></svg>`,
-  tnb:     `<svg viewBox="0 0 24 24" width="SIZE" height="SIZE"><rect width="24" height="24" rx="6" fill="#003087"/><text x="12" y="16" text-anchor="middle" font-size="8" font-weight="900" fill="#FFD700" font-family="sans-serif">TNB</text></svg>`,
-  unifi:   `<svg viewBox="0 0 24 24" width="SIZE" height="SIZE"><rect width="24" height="24" rx="6" fill="#6B1BE3"/><text x="12" y="16" text-anchor="middle" font-size="7" font-weight="900" fill="#fff" font-family="sans-serif">unifi</text></svg>`,
-  umobile: `<svg viewBox="0 0 24 24" width="SIZE" height="SIZE"><rect width="24" height="24" rx="6" fill="#E4002B"/><text x="12" y="16" text-anchor="middle" font-size="9" font-weight="900" fill="#fff" font-family="sans-serif">U</text></svg>`,
+const BRAND_SVGS={
+  youtube:`<svg viewBox="0 0 24 24" width="SIZE" height="SIZE"><path fill="#FF0000" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8z"/><path fill="#fff" d="M9.6 15.6V8.4l6.2 3.6-6.2 3.6z"/></svg>`,
+  claude:`<svg viewBox="0 0 24 24" width="SIZE" height="SIZE"><rect width="24" height="24" rx="6" fill="#D4B896"/><text x="12" y="17" text-anchor="middle" font-size="13" font-weight="700" fill="#1a1a1a" font-family="serif">C</text></svg>`,
+  icloud:`<svg viewBox="0 0 24 24" width="SIZE" height="SIZE"><rect width="24" height="24" rx="6" fill="#3478F6"/><path fill="#fff" d="M17.5 10.2a5 5 0 0 0-9.8 1.3A3.5 3.5 0 0 0 8 18h9a3 3 0 0 0 .5-6z"/></svg>`,
+  mazda:`<svg viewBox="0 0 24 24" width="SIZE" height="SIZE"><rect width="24" height="24" rx="6" fill="#1a1a1a"/><ellipse cx="12" cy="12" rx="7" ry="5" fill="none" stroke="#fff" stroke-width="1.5"/><ellipse cx="12" cy="12" rx="3.5" ry="5" fill="none" stroke="#fff" stroke-width="1.5"/></svg>`,
+  aia:`<svg viewBox="0 0 24 24" width="SIZE" height="SIZE"><rect width="24" height="24" rx="6" fill="#E4002B"/><text x="12" y="16" text-anchor="middle" font-size="9" font-weight="900" fill="#fff" font-family="sans-serif">AIA</text></svg>`,
+  tnb:`<svg viewBox="0 0 24 24" width="SIZE" height="SIZE"><rect width="24" height="24" rx="6" fill="#003087"/><text x="12" y="16" text-anchor="middle" font-size="8" font-weight="900" fill="#FFD700" font-family="sans-serif">TNB</text></svg>`,
+  unifi:`<svg viewBox="0 0 24 24" width="SIZE" height="SIZE"><rect width="24" height="24" rx="6" fill="#6B1BE3"/><text x="12" y="16" text-anchor="middle" font-size="7" font-weight="900" fill="#fff" font-family="sans-serif">unifi</text></svg>`,
+  umobile:`<svg viewBox="0 0 24 24" width="SIZE" height="SIZE"><rect width="24" height="24" rx="6" fill="#E4002B"/><text x="12" y="16" text-anchor="middle" font-size="9" font-weight="900" fill="#fff" font-family="sans-serif">U</text></svg>`,
   vanguard:`<svg viewBox="0 0 24 24" width="SIZE" height="SIZE"><rect width="24" height="24" rx="6" fill="#8B0000"/><text x="12" y="16" text-anchor="middle" font-size="7" font-weight="700" fill="#fff" font-family="sans-serif">VOO</text></svg>`,
 };
-
-function iconHtml(icon,size) {
-  const px=size||22;
-  if(!icon) return`<span style="font-size:${px}px">📌</span>`;
-  if(icon.startsWith("svg:")){const svg=BRAND_SVGS[icon.slice(4)];return svg?svg.replaceAll("SIZE",px):`<span style="font-size:${px}px">⬜</span>`;}
-  return`<span style="font-size:${px}px;line-height:1">${icon}</span>`;
+function iconHtml(icon,size){const px=size||22;if(!icon)return`<span style="font-size:${px}px">📌</span>`;if(icon.startsWith("svg:")){const svg=BRAND_SVGS[icon.slice(4)];return svg?svg.replaceAll("SIZE",px):`<span style="font-size:${px}px">⬜</span>`;}return`<span style="font-size:${px}px;line-height:1">${icon}</span>`;}
+const PAYMENT_METHODS=[
+  {value:"CC UOB",label:"UOB PRVI Miles",sub:"Credit Card",svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#003087"/><text x="20" y="26" text-anchor="middle" font-size="13" font-weight="900" fill="#fff" font-family="sans-serif">UOB</text></svg>`},
+  {value:"CC CIMB",label:"CIMB",sub:"Credit Card",svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#C8102E"/><text x="20" y="27" text-anchor="middle" font-size="10" font-weight="900" fill="#fff" font-family="sans-serif">CIMB</text></svg>`},
+  {value:"QR Maybank",label:"Maybank",sub:"QR Pay",svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#FFCC00"/><text x="20" y="27" text-anchor="middle" font-size="8" font-weight="900" fill="#1a1a1a" font-family="sans-serif">Maybank</text></svg>`},
+  {value:"QR Ambank",label:"AmBank",sub:"QR Pay",svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#E4002B"/><text x="20" y="27" text-anchor="middle" font-size="8" font-weight="900" fill="#fff" font-family="sans-serif">AmBank</text></svg>`},
+  {value:"QR CIMB",label:"CIMB",sub:"QR Pay",svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#C8102E"/><text x="20" y="27" text-anchor="middle" font-size="10" font-weight="900" fill="#fff" font-family="sans-serif">CIMB</text></svg>`},
+  {value:"TnG",label:"Touch & Go",sub:"eWallet",svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#00A0E3"/><text x="20" y="24" text-anchor="middle" font-size="11" font-weight="900" fill="#fff" font-family="sans-serif">TnG</text></svg>`},
+  {value:"Debit Card",label:"Debit Card",sub:"Any bank",svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#64748b"/><rect x="6" y="13" width="28" height="18" rx="3" fill="none" stroke="#fff" stroke-width="2"/><rect x="6" y="19" width="28" height="5" fill="#fff" opacity="0.4"/></svg>`},
+  {value:"Bank Transfer",label:"Bank Transfer",sub:"Online",svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#0ea5e9"/><text x="20" y="25" text-anchor="middle" font-size="20" fill="#fff" font-family="sans-serif">🏦</text></svg>`},
+  {value:"Cash",label:"Cash",sub:"Physical",svg:`<svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#059669"/><text x="20" y="25" text-anchor="middle" font-size="20" fill="#fff" font-family="sans-serif">💵</text></svg>`},
+];
+let _pickerTarget=null;
+function openPaymentPicker(target){
+  _pickerTarget=target;
+  const modal=document.getElementById("payment-modal"),sheet=document.getElementById("payment-sheet"),opts=document.getElementById("payment-options");
+  let current=target==="expense"?document.getElementById("f-payment").value:getBillState(target).payment||"";
+  opts.innerHTML=PAYMENT_METHODS.map(pm=>`<div onclick="selectPayment('${pm.value}')" style="display:flex;align-items:center;gap:14px;padding:12px 8px;border-radius:12px;cursor:pointer;background:${current===pm.value?"var(--indigo3)":"transparent"};margin-bottom:2px;-webkit-tap-highlight-color:transparent">${pm.svg}<div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--text1)">${pm.label}</div><div style="font-size:11px;color:var(--text3);margin-top:1px">${pm.sub}</div></div>${current===pm.value?'<span style="color:var(--indigo);font-size:18px">✓</span>':''}</div>`).join("");
+  modal.style.display="block";requestAnimationFrame(()=>{sheet.style.transform="translateY(0)";});
 }
-
-function renderBills() {
+function closePaymentPicker(){const sheet=document.getElementById("payment-sheet"),modal=document.getElementById("payment-modal");sheet.style.transform="translateY(100%)";setTimeout(()=>{modal.style.display="none";},300);}
+function selectPayment(value){
+  const pm=PAYMENT_METHODS.find(p=>p.value===value);if(!pm)return;
+  const smallSvg=pm.svg.replace('width="36" height="36"','width="20" height="20"');
+  const displayHtml=`${smallSvg} <span style="color:var(--text1);font-size:13px;font-weight:500">${pm.label} <span style="color:var(--text3);font-weight:400">— ${pm.sub}</span></span>`;
+  if(_pickerTarget==="expense"){document.getElementById("f-payment").value=value;const btn=document.getElementById("f-payment-btn");if(btn)btn.innerHTML=displayHtml;}
+  else{saveBillState(_pickerTarget,{payment:value});const dispEl=document.getElementById("pm-display-"+_pickerTarget);if(dispEl)dispEl.innerHTML=displayHtml;}
+  closePaymentPicker();
+}
+function renderBills(){
   syncBillAmounts();
   const total=BILL_DEFS.length,paid=BILL_DEFS.filter(d=>getBillState(d.id).paid||d.auto).length,pct=Math.round((paid/total)*100);
   const now=new Date(),isMax=billsViewYear===now.getFullYear()&&billsViewMonth===now.getMonth(),isCur=isCurrentBillsMonth();
   document.getElementById("bills-progress-label").textContent=`${MONTHS_FULL[billsViewMonth]} ${billsViewYear} · ${paid} of ${total} cleared`;
   document.getElementById("bills-pct-label").textContent=`${paid} / ${total} paid`;
   const fill=document.getElementById("bills-progress-fill");
-  fill.style.width=pct+"%"; fill.style.background=pct===100?"var(--green)":pct>=60?"var(--indigo)":"var(--amber)";
+  fill.style.width=pct+"%";fill.style.background=pct===100?"var(--green)":pct>=60?"var(--indigo)":"var(--amber)";
   document.getElementById("bills-month-nav").innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 14px;margin-bottom:12px"><button onclick="navigateBillsMonth(-1)" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--indigo);line-height:1">‹</button><div style="text-align:center"><div style="font-size:13px;font-weight:700;color:var(--text1)">${MONTHS_FULL[billsViewMonth]} ${billsViewYear}</div>${isCur?'<span style="font-size:9px;color:var(--green);font-weight:700;background:var(--green2);padding:2px 8px;border-radius:99px">CURRENT MONTH</span>':''}</div><button onclick="navigateBillsMonth(1)" style="background:none;border:none;font-size:22px;cursor:pointer;color:${isMax?"var(--text4)":"var(--indigo)"};line-height:1" ${isMax?"disabled":""}>›</button></div>`;
-
   const pmPickerBtn=(billId,currentPayment)=>{
     const pm=PAYMENT_METHODS.find(p=>p.value===currentPayment);
     const display=pm?`${pm.svg.replace('width="36" height="36"','width="20" height="20"')} <span style="color:var(--text1);font-size:13px;font-weight:500">${pm.label} <span style="color:var(--text3);font-weight:400">— ${pm.sub}</span></span>`:`<span style="color:var(--text3);font-size:13px">— Select payment method —</span>`;
     return`<div style="margin-bottom:8px"><div style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Payment Method</div><button type="button" id="pm-display-${billId}" onclick="openPaymentPicker('${billId}')" style="width:100%;padding:10px 12px;background:#fff;border:1px solid var(--border);border-radius:8px;font-size:13px;color:var(--text3);text-align:left;cursor:pointer;display:flex;align-items:center;gap:8px">${display}</button></div>`;
   };
-
   document.getElementById("bills-list").innerHTML=BILL_DEFS.map(def=>{
     const st=getBillState(def.id),status=dueStatus(def),cfg=STATUS_CONFIG[status];
     const displayAmt=st.amount!=null?st.amount:def.amount;
@@ -1558,85 +865,11 @@ function renderBills() {
     const cardBg=def.investment&&!st.paid?"#f5f3ff":cfg.bg,cardBorder=def.investment&&!st.paid?"#c4b5fd":cfg.border;
     const statusLabel=def.investment&&!st.paid?"PENDING":cfg.label,statusColor=def.investment&&!st.paid?"var(--purple)":cfg.color;
     const amountField=def.variable||def.investment?`<div style="margin-bottom:8px"><div style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">${def.investment?"Amount":"Amount This Month"}</div><div style="position:relative"><span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">RM</span><input type="number" placeholder="0.00" value="${st.amount||def.amount||''}" inputmode="decimal" style="width:100%;padding:8px 8px 8px 28px;background:#fff;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Mono',monospace;outline:none" onchange="saveBillState('${def.id}',{amount:parseFloat(this.value)||null});renderBills()"/></div></div>`:`<div style="margin-bottom:8px"><div style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Amount <span style="color:var(--text4);font-weight:400">(tap to edit)</span></div><div style="position:relative"><span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">RM</span><input type="number" value="${displayAmt||''}" inputmode="decimal" style="width:100%;padding:8px 8px 8px 28px;background:#fff;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Mono',monospace;outline:none" onchange="saveBillState('${def.id}',{amount:parseFloat(this.value)||null});renderBills()"/></div></div>`;
-    // Auto-deduct toggle shown on every card
-    const autoToggle = `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);margin-bottom:8px">
-      <span style="font-size:11px;color:var(--text2);font-weight:500">Auto-deduct</span>
-      <button onclick="toggleBillAuto('${def.id}')" style="background:${def.auto?'var(--indigo)':'var(--surface2)'};border:1px solid ${def.auto?'var(--indigo2)':'var(--border)'};border-radius:99px;padding:4px 12px;font-size:10px;font-weight:700;color:${def.auto?'#fff':'var(--text3)'};cursor:pointer">
-        ${def.auto?'ON — tap to set manual':'OFF — tap to set auto'}
-      </button>
-    </div>`;
-
-    const innerContent = def.auto
-      ? `${autoToggle}<div style="font-size:11px;color:var(--text4);font-style:italic;padding:4px 0">No action needed — tracked automatically</div>`
-      : `${autoToggle}${amountField}${pmPickerBtn(def.id,st.payment)}<input type="text" placeholder="Note (optional)" value="${st.note||''}" style="width:100%;padding:8px 10px;background:#fff;border:1px solid var(--border);border-radius:8px;font-size:12px;outline:none;margin-bottom:10px" onchange="saveBillState('${def.id}',{note:this.value})"/><button onclick="togglePaid('${def.id}')" style="width:100%;padding:10px;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;background:${st.paid?"var(--surface2)":"var(--indigo)"};color:${st.paid?"var(--text3)":"#fff"}">${st.paid?"✓ Paid — Tap to Undo":"Mark as Paid"}</button>`;
-    return`${divider}<div style="background:${cardBg};border:1px solid ${cardBorder};border-radius:12px;padding:14px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px"><div style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center">${iconHtml(def.icon,24)}</div><div><div style="font-size:13px;font-weight:600;color:var(--text1)">${def.label}</div><div style="font-size:10px;color:var(--text4);margin-top:1px;font-family:'DM Mono',monospace">${dueDayLabel(def)}</div></div></div><div style="display:flex;align-items:flex-start;gap:8px"><div style="text-align:right"><div style="font-size:14px;font-weight:800;font-family:'DM Mono',monospace;color:var(--text1)">${displayAmt!=null?fmtMYR(displayAmt):"Variable"}</div><span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:99px;background:${statusColor}22;color:${statusColor};letter-spacing:0.5px;text-transform:uppercase">${statusLabel}</span></div>${def.custom?`<button onclick="deleteBill('${def.id}')" style="background:var(--red2);border:none;border-radius:6px;color:var(--red);font-size:11px;font-weight:700;padding:3px 7px;cursor:pointer;margin-top:2px">✕</button>`:''}
-</div></div>${innerContent}</div>`;
+    const innerContent=def.auto?`<div style="font-size:11px;color:var(--text4);font-style:italic">Auto-deducted — no action needed</div>`:`${amountField}${pmPickerBtn(def.id,st.payment)}<input type="text" placeholder="Note (optional)" value="${st.note||''}" style="width:100%;padding:8px 10px;background:#fff;border:1px solid var(--border);border-radius:8px;font-size:12px;outline:none;margin-bottom:10px" onchange="saveBillState('${def.id}',{note:this.value})"/><button onclick="togglePaid('${def.id}')" style="width:100%;padding:10px;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;background:${st.paid?"var(--surface2)":"var(--indigo)"};color:${st.paid?"var(--text3)":"#fff"}">${st.paid?"✓ Paid — Tap to Undo":"Mark as Paid"}</button>`;
+    return`${divider}<div style="background:${cardBg};border:1px solid ${cardBorder};border-radius:12px;padding:14px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px"><div style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center">${iconHtml(def.icon,24)}</div><div><div style="font-size:13px;font-weight:600;color:var(--text1)">${def.label}</div><div style="font-size:10px;color:var(--text4);margin-top:1px;font-family:'DM Mono',monospace">${dueDayLabel(def)}</div></div></div><div style="text-align:right"><div style="font-size:14px;font-weight:800;font-family:'DM Mono',monospace;color:var(--text1)">${displayAmt!=null?fmtMYR(displayAmt):"Variable"}</div><span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:99px;background:${statusColor}22;color:${statusColor};letter-spacing:0.5px;text-transform:uppercase">${statusLabel}</span></div></div>${innerContent}</div>`;
   }).join("");
 }
-
-function togglePaid(id) {
-  const def=BILL_DEFS.find(d=>d.id===id), st=getBillState(id), nowPaid=!st.paid;
-  saveBillState(id,{paid:nowPaid});
-  if(nowPaid&&!def.auto){
-    const amt=parseFloat(st.amount)||def.amount;
-    if(amt&&amt>0){
-      const logDate=isCurrentBillsMonth()?new Date().toISOString().split("T")[0]:new Date(billsViewYear,billsViewMonth+1,0).toISOString().split("T")[0];
-      expenses.push({id:Date.now(),amount:amt,cat:"Bills",payment:st.payment||"",note:def.label+(st.note?" — "+st.note:""),date:logDate,fromBill:true});
-      save("dev_expenses",expenses);
-    }
-  }
-  if(!nowPaid){
-    expenses=expenses.filter(e=>{
-      if(!e.fromBill) return true;
-      const d=new Date(e.date);
-      return!(d.getMonth()===billsViewMonth&&d.getFullYear()===billsViewYear&&e.note&&e.note.startsWith(def.label));
-    });
-    save("dev_expenses",expenses);
-  }
-  renderBills(); renderOverview();
-  toast(nowPaid?"✓ Paid & logged":"Marked unpaid");
-}
-
-function toggleBillAuto(id) {
-  const def = BILL_DEFS.find(d => d.id === id);
-  if (!def) return;
-  def.auto = !def.auto;
-  // Save custom auto overrides to localStorage
-  const autoOverrides = load("dev_bill_auto", {});
-  autoOverrides[id] = def.auto;
-  save("dev_bill_auto", autoOverrides);
-  renderBills();
-  toast(def.auto ? "Set to auto-deduct" : "Set to manual");
-}
-
-function addNewBill() {
-  const label = prompt("Bill name:");
-  if (!label || !label.trim()) return;
-  const amount = parseFloat(prompt("Monthly amount (RM):") || "0") || 0;
-  const id = "custom_" + Date.now();
-  BILL_DEFS.push({ id, label: label.trim(), amount, due: null, auto: false, icon: "📌", custom: true });
-  fixedCom.push({ label: label.trim(), amount });
-  save("dev_fixed", fixedCom);
-  const customBills = load("dev_custom_bills", []);
-  customBills.push({ id, label: label.trim(), amount, due: null, auto: false, icon: "📌", custom: true });
-  save("dev_custom_bills", customBills);
-  renderBills();
-  renderCommitments();
-  toast("Bill added ✓");
-}
-
-function deleteBill(id) {
-  const idx = BILL_DEFS.findIndex(d => d.id === id);
-  if (idx > -1) BILL_DEFS.splice(idx, 1);
-  const fcIdx = fixedCom.findIndex(f => f.id === id);
-  if (fcIdx > -1) fixedCom.splice(fcIdx, 1);
-  save("dev_fixed", fixedCom);
-  const customBills = load("dev_custom_bills", []).filter(b => b.id !== id);
-  save("dev_custom_bills", customBills);
-  renderBills();
-  renderCommitments();
-  toast("Bill removed");
-}
+function togglePaid(id){
   const def=BILL_DEFS.find(d=>d.id===id),st=getBillState(id),nowPaid=!st.paid;
   saveBillState(id,{paid:nowPaid});
   if(nowPaid&&!def.auto){
@@ -1648,333 +881,126 @@ function deleteBill(id) {
     }
   }
   if(!nowPaid){
-    expenses=expenses.filter(e=>{if(!e.fromBill) return true; const d=new Date(e.date); return!(d.getMonth()===billsViewMonth&&d.getFullYear()===billsViewYear&&e.note&&e.note.startsWith(def.label));});
+    expenses=expenses.filter(e=>{if(!e.fromBill)return true;const d=new Date(e.date);return!(d.getMonth()===billsViewMonth&&d.getFullYear()===billsViewYear&&e.note&&e.note.startsWith(def.label));});
     save("dev_expenses",expenses);
   }
-  renderBills(); renderOverview(); toast(nowPaid?"✓ Paid & logged":"Marked unpaid");
+  renderBills();renderOverview();toast(nowPaid?"✓ Paid & logged":"Marked unpaid");
 }
-
-// ══════════════════════════════════════════════════════════════════════
-// 14. PAYMENT PICKER
-// ══════════════════════════════════════════════════════════════════════
-let _pickerTarget=null;
-function openPaymentPicker(target) {
-  _pickerTarget=target;
-  const modal=document.getElementById("payment-modal"),sheet=document.getElementById("payment-sheet"),opts=document.getElementById("payment-options");
-  let current=target==="expense"?document.getElementById("f-payment").value:getBillState(target).payment||"";
-  opts.innerHTML=PAYMENT_METHODS.map(pm=>`<div onclick="selectPayment('${pm.value}')" style="display:flex;align-items:center;gap:14px;padding:12px 8px;border-radius:12px;cursor:pointer;background:${current===pm.value?"var(--indigo3)":"transparent"};margin-bottom:2px;-webkit-tap-highlight-color:transparent">${pm.svg}<div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--text1)">${pm.label}</div><div style="font-size:11px;color:var(--text3);margin-top:1px">${pm.sub}</div></div>${current===pm.value?'<span style="color:var(--indigo);font-size:18px">✓</span>':''}</div>`).join("");
-  modal.style.display="block"; requestAnimationFrame(()=>{sheet.style.transform="translateY(0)";});
+function addNewBill(){
+  const label=prompt("Bill name:");if(!label||!label.trim())return;
+  const amount=parseFloat(prompt("Monthly amount (MYR):")||"0")||0;
+  const id="custom_"+Date.now();
+  BILL_DEFS.push({id,label:label.trim(),amount,due:null,auto:false,icon:"📌",custom:true});
+  fixedCom.push({label:label.trim(),amount});save("dev_fixed",fixedCom);
+  const customBills=load("dev_custom_bills",[]);customBills.push({id,label:label.trim(),amount,due:null,auto:false,icon:"📌"});save("dev_custom_bills",customBills);
+  renderBills();renderCommitments();toast("Bill added ✓");
 }
-function closePaymentPicker() { const sheet=document.getElementById("payment-sheet"),modal=document.getElementById("payment-modal"); sheet.style.transform="translateY(100%)"; setTimeout(()=>{modal.style.display="none";},300); }
-function selectPayment(value) {
-  const pm=PAYMENT_METHODS.find(p=>p.value===value); if(!pm) return;
-  const smallSvg=pm.svg.replace('width="36" height="36"','width="20" height="20"');
-  const displayHtml=`${smallSvg} <span style="color:var(--text1);font-size:13px;font-weight:500">${pm.label} <span style="color:var(--text3);font-weight:400">— ${pm.sub}</span></span>`;
-  if(_pickerTarget==="expense"){
-    document.getElementById("f-payment").value=value;
-    const btn=document.getElementById("f-payment-btn"); if(btn) btn.innerHTML=displayHtml;
-  } else {
-    saveBillState(_pickerTarget,{payment:value});
-    const dispEl=document.getElementById("pm-display-"+_pickerTarget); if(dispEl) dispEl.innerHTML=displayHtml;
-  }
-  closePaymentPicker();
-}
-
-// ══════════════════════════════════════════════════════════════════════
-// 15. LIVE EXCHANGE RATE
-// ══════════════════════════════════════════════════════════════════════
-async function fetchLiveRate() {
-  try {
+async function fetchLiveRate(){
+  try{
     const cached=load("dev_sgdrate",{}),today=new Date().toISOString().split("T")[0];
     if(cached.rate&&cached.date===today){SGD_RATE=parseFloat(cached.rate);GROSS_MYR=profile.sgdSalary*SGD_RATE;TOTAL_INCOME=GROSS_MYR+profile.airbnbIncome;setRateDisplay(cached.rate,"Cached");return;}
     const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),5000);
     const res=await fetch("https://api.frankfurter.app/latest?from=SGD&to=MYR",{signal:controller.signal});
-    clearTimeout(timeout);
-    const data=await res.json(),rate=data&&data.rates&&data.rates.MYR;
-    if(!rate) throw new Error("no rate");
-    save("dev_sgdrate",{rate,date:today});
-    SGD_RATE=rate;GROSS_MYR=profile.sgdSalary*SGD_RATE;TOTAL_INCOME=GROSS_MYR+profile.airbnbIncome;
-    setRateDisplay(rate,"Live"); renderOverview();
-  } catch(_){setRateDisplay(SGD_RATE,"Fallback");}
+    clearTimeout(timeout);const data=await res.json(),rate=data&&data.rates&&data.rates.MYR;
+    if(!rate)throw new Error("no rate");
+    save("dev_sgdrate",{rate,date:today});SGD_RATE=rate;GROSS_MYR=profile.sgdSalary*SGD_RATE;TOTAL_INCOME=GROSS_MYR+profile.airbnbIncome;
+    setRateDisplay(rate,"Live");renderOverview();
+  }catch(_){setRateDisplay(SGD_RATE,"Fallback");}
 }
-function setRateDisplay(rate,src) {
-  const el=document.getElementById("ov-rate"); if(!el) return;
+function setRateDisplay(rate,src){
+  const el=document.getElementById("ov-rate");if(!el)return;
   const col=src==="Live"?"var(--green)":src==="Cached"?"var(--indigo)":"var(--text4)";
   el.innerHTML=`SGD/MYR <strong>${parseFloat(rate).toFixed(4)}</strong> &nbsp;<span style="color:${col};font-size:10px;font-weight:700">● ${src}</span>`;
 }
-
-// ══════════════════════════════════════════════════════════════════════
-// PDF REPORT GENERATOR
-// ══════════════════════════════════════════════════════════════════════
-async function generatePDFReport() {
-  const overlay = document.getElementById("pdf-overlay");
-  const status  = document.getElementById("pdf-status");
-  const bar     = document.getElementById("pdf-progress-bar");
-  const container = document.getElementById("pdf-render-container");
-
-  function setProgress(pct, msg) {
-    bar.style.width = pct + "%";
-    status.textContent = msg;
-  }
-
-  try {
-    overlay.style.display = "flex";
-    setProgress(5, "Gathering your data...");
-
-    const now = new Date(), m = now.getMonth(), y = now.getFullYear();
-    const exps = monthlyExpenses(m, y);
-    const spent = exps.reduce((s,e) => s + Number(e.amount), 0);
-    const disc  = discretionary(), left = disc - spent;
-    const cp = profile.currentPort||0, vm = profile.vooMonthly||0, yrs = profile.years||20;
-    const proj8  = project(cp,vm,yrs,MONTHLY_RETURN_8)[yrs].val;
-    const proj10 = project(cp,vm,yrs,MONTHLY_RETURN_10)[yrs].val;
-    const proj12 = project(cp,vm,yrs,MONTHLY_RETURN_12)[yrs].val;
-    const paidBills = BILL_DEFS.filter(d => getBillState(d.id).paid || d.auto).length;
-    const avoidable = exps.filter(e => AVOIDABLE.includes(e.cat)).reduce((s,e) => s + Number(e.amount), 0);
-    const catTotals = CATS.map(c => ({...c, total: exps.filter(e => e.cat === c.label).reduce((s,e) => s + Number(e.amount), 0)}))
-                          .filter(c => c.total > 0).sort((a,b) => b.total - a.total);
-    const totalFixedAmt = totalFixed();
-    const sgdRate = SGD_RATE || 3.15;
-    const burnPct = disc > 0 ? Math.min(Math.round((spent/disc)*100), 100) : 0;
-    const totalTracked = (profile.sgdSavings||0) + (profile.moomooPort||0) + (profile.moomooCash||0);
-    const pieColors = ["#6366f1","#f59e0b","#22c55e","#ec4899","#14b8a6","#ef4444","#a855f7","#f97316","#64748b","#0ea5e9"];
-
-    function pieSVG(slices, total, sz) {
-      if (!total || !slices.length) return `<div style="width:${sz}px;height:${sz}px;background:#f1f5f9;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#94a3b8">No data</div>`;
-      let ang = -90, paths = "";
-      slices.forEach((s,i) => {
-        const pct=s.total/total, sw=pct*360, r=sz/2-6, cx=sz/2, cy=sz/2;
-        const a1=ang*Math.PI/180, a2=(ang+sw)*Math.PI/180;
-        const x1=cx+r*Math.cos(a1), y1=cy+r*Math.sin(a1), x2=cx+r*Math.cos(a2), y2=cy+r*Math.sin(a2);
-        paths += `<path d="M${cx},${cy} L${x1.toFixed(1)},${y1.toFixed(1)} A${r},${r} 0 ${sw>180?1:0},1 ${x2.toFixed(1)},${y2.toFixed(1)} Z" fill="${pieColors[i%pieColors.length]}"/>`;
-        ang += sw;
-      });
-      return `<svg width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}" style="display:block">${paths}<circle cx="${sz/2}" cy="${sz/2}" r="${sz/4}" fill="white"/></svg>`;
+async function generatePDFReport(){
+  const overlay=document.getElementById("pdf-overlay"),status=document.getElementById("pdf-status"),bar=document.getElementById("pdf-progress-bar"),container=document.getElementById("pdf-render-container");
+  function setProgress(pct,msg){bar.style.width=pct+"%";status.textContent=msg;}
+  try{
+    overlay.style.display="flex";setProgress(5,"Gathering data...");
+    const now=new Date(),m=now.getMonth(),y=now.getFullYear(),exps=monthlyExpenses(m,y);
+    const spent=exps.reduce((s,e)=>s+Number(e.amount),0),disc=discretionary(),left=disc-spent;
+    const cp=profile.currentPort||0,vm=profile.vooMonthly||0,yrs=profile.years||20;
+    const proj8=project(cp,vm,yrs,MONTHLY_RETURN_8)[yrs].val,proj10=project(cp,vm,yrs,MONTHLY_RETURN_10)[yrs].val,proj12=project(cp,vm,yrs,MONTHLY_RETURN_12)[yrs].val;
+    const paidBills=BILL_DEFS.filter(d=>getBillState(d.id).paid||d.auto).length;
+    const avoidable=exps.filter(e=>AVOIDABLE.includes(e.cat)).reduce((s,e)=>s+Number(e.amount),0);
+    const catTotals=CATS.map(c=>({...c,total:exps.filter(e=>e.cat===c.label).reduce((s,e)=>s+Number(e.amount),0)})).filter(c=>c.total>0).sort((a,b)=>b.total-a.total);
+    const totalFixedAmt=totalFixed(),sgdRate=SGD_RATE||3.15,burnPct=disc>0?Math.min(Math.round((spent/disc)*100),100):0;
+    const totalTracked=(profile.sgdSavings||0)+(profile.moomooPort||0)+(profile.moomooCash||0);
+    const pieColors=["#6366f1","#f59e0b","#22c55e","#ec4899","#14b8a6","#ef4444","#a855f7","#f97316","#64748b","#0ea5e9"];
+    function pieSVG(slices,total,sz){
+      if(!total||!slices.length)return`<div style="width:${sz}px;height:${sz}px;background:#f1f5f9;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#94a3b8">No data</div>`;
+      let ang=-90,paths="";
+      slices.forEach((s,i)=>{const pct=s.total/total,sw=pct*360,r=sz/2-6,cx=sz/2,cy=sz/2;const a1=ang*Math.PI/180,a2=(ang+sw)*Math.PI/180;const x1=cx+r*Math.cos(a1),y1=cy+r*Math.sin(a1),x2=cx+r*Math.cos(a2),y2=cy+r*Math.sin(a2);paths+=`<path d="M${cx},${cy} L${x1.toFixed(1)},${y1.toFixed(1)} A${r},${r} 0 ${sw>180?1:0},1 ${x2.toFixed(1)},${y2.toFixed(1)} Z" fill="${pieColors[i%pieColors.length]}"/>`;ang+=sw;});
+      return`<svg width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}" style="display:block">${paths}<circle cx="${sz/2}" cy="${sz/2}" r="${sz/4}" fill="white"/></svg>`;
     }
-
-    setProgress(20, "Building report layout...");
-
-    container.innerHTML = `
-    <div style="font-family:Helvetica Neue,Arial,sans-serif;font-size:12px;color:#1e293b;padding:32px;background:#fff">
-
-      <!-- HEADER -->
+    setProgress(20,"Building layout...");
+    container.innerHTML=`<div style="font-family:Helvetica Neue,Arial,sans-serif;font-size:12px;color:#1e293b;padding:32px;background:#fff">
       <div style="background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;padding:24px 28px;border-radius:14px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:flex-end">
-        <div>
-          <div style="font-size:22px;font-weight:800;letter-spacing:-0.5px">DevFinance Monthly Report</div>
-          <div style="font-size:11px;opacity:0.7;margin-top:4px">${MONTHS_FULL[m]} ${y} · Generated ${now.toLocaleDateString('en-MY',{day:'numeric',month:'short',year:'numeric'})}</div>
-        </div>
-        <div style="text-align:right">
-          <div style="font-size:10px;opacity:0.6">SGD / MYR</div>
-          <div style="font-size:18px;font-weight:700">${sgdRate.toFixed(4)}</div>
-        </div>
+        <div><div style="font-size:22px;font-weight:800">DevFinance Monthly Report</div><div style="font-size:11px;opacity:0.7;margin-top:4px">${MONTHS_FULL[m]} ${y} · ${now.toLocaleDateString('en-MY',{day:'numeric',month:'short',year:'numeric'})}</div></div>
+        <div style="text-align:right"><div style="font-size:10px;opacity:0.6">SGD / MYR</div><div style="font-size:18px;font-weight:700">${sgdRate.toFixed(4)}</div></div>
       </div>
-
-      <!-- INCOME CARDS -->
       <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#64748b;margin-bottom:10px;padding-left:8px;border-left:3px solid #4f46e5">Income & Cash Flow</div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:20px">
-        ${[
-          {t:"Monthly Income",   v:fmtMYR(TOTAL_INCOME),    s:`SGD ${(profile.sgdSalary||0).toLocaleString()} + Airbnb`, c:"#059669"},
-          {t:"Fixed Outflows",   v:fmtMYR(totalFixedAmt),   s:`${fixedCom.length} items · ${Math.round((totalFixedAmt/TOTAL_INCOME)*100)}% of income`, c:"#dc2626"},
-          {t:"VOO Investment",   v:fmtMYR(vm),              s:"Monthly allocation", c:"#4f46e5"},
-          {t:"Discretionary",    v:fmtMYR(disc),            s:"After fixed + investment", c:"#d97706"},
-        ].map(c=>`<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px">
-          <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;margin-bottom:6px">${c.t}</div>
-          <div style="font-size:18px;font-weight:800;color:${c.c}">${c.v}</div>
-          <div style="font-size:10px;color:#94a3b8;margin-top:3px">${c.s}</div>
-        </div>`).join("")}
+        ${[{t:"Monthly Income",v:fmtMYR(TOTAL_INCOME),s:`SGD ${(profile.sgdSalary||0).toLocaleString()} + Airbnb`,c:"#059669"},{t:"Fixed Outflows",v:fmtMYR(totalFixedAmt),s:`${fixedCom.length} items`,c:"#dc2626"},{t:"VOO Investment",v:fmtMYR(vm),s:"Monthly",c:"#4f46e5"},{t:"Discretionary",v:fmtMYR(disc),s:"After fixed",c:"#d97706"}].map(c=>`<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px"><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;margin-bottom:6px">${c.t}</div><div style="font-size:18px;font-weight:800;color:${c.c}">${c.v}</div><div style="font-size:10px;color:#94a3b8;margin-top:3px">${c.s}</div></div>`).join("")}
       </div>
-
-      <!-- INCOME SOURCES -->
-      <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#64748b;margin-bottom:10px;padding-left:8px;border-left:3px solid #4f46e5">Income Sources</div>
-      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:16px;margin-bottom:20px;display:flex;align-items:center;gap:20px">
-        <div style="flex:1">
-          ${[{l:"💼 SGD Salary",v:fmtMYR(profile.sgdSalary*sgdRate)},{l:"🏠 Airbnb — Ipoh",v:fmtMYR(profile.airbnbIncome||0)},{l:"TOTAL",v:fmtMYR(TOTAL_INCOME),bold:true}].map(r=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f1f5f9"><span style="font-size:12px${r.bold?';font-weight:700':''}">${r.l}</span><strong style="color:#059669;font-size:${r.bold?'14':'12'}px">${r.v}</strong></div>`).join("")}
-        </div>
-        <div style="text-align:center">
-          ${pieSVG([{total:profile.sgdSalary*sgdRate},{total:profile.airbnbIncome||0.1}], TOTAL_INCOME, 100)}
-          <div style="display:flex;gap:8px;justify-content:center;margin-top:6px">
-            <span style="font-size:9px;color:#64748b;display:flex;align-items:center;gap:3px"><span style="width:8px;height:8px;background:#6366f1;border-radius:2px;display:inline-block"></span>Salary</span>
-            <span style="font-size:9px;color:#64748b;display:flex;align-items:center;gap:3px"><span style="width:8px;height:8px;background:#f59e0b;border-radius:2px;display:inline-block"></span>Airbnb</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- SPENDING -->
-      <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#64748b;margin-bottom:10px;padding-left:8px;border-left:3px solid #4f46e5">Spending This Month</div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#64748b;margin-bottom:10px;padding-left:8px;border-left:3px solid #4f46e5">Spending — ${MONTHS_FULL[m]}</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px">
-          <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;margin-bottom:6px">Total Spent</div>
-          <div style="font-size:20px;font-weight:800;color:#dc2626">${fmtMYR(spent)}</div>
-          <div style="font-size:10px;color:#94a3b8;margin-top:3px">${burnPct}% of discretionary budget</div>
-          <div style="background:#f1f5f9;border-radius:99px;height:5px;margin-top:8px;overflow:hidden"><div style="height:100%;width:${burnPct}%;background:${burnPct<40?'#059669':burnPct<70?'#d97706':'#dc2626'};border-radius:99px"></div></div>
-        </div>
-        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px">
-          <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;margin-bottom:6px">Budget Remaining</div>
-          <div style="font-size:20px;font-weight:800;color:${left>=0?'#059669':'#dc2626'}">${fmtMYR(Math.abs(left))}</div>
-          <div style="font-size:10px;color:#94a3b8;margin-top:3px">${left>=0?'left this month':'OVER BUDGET'}</div>
-          ${avoidable>0?`<div style="margin-top:8px;display:inline-block;background:#fef3c7;color:#d97706;padding:3px 8px;border-radius:99px;font-size:9px;font-weight:700">⚠ ${fmtMYR(avoidable)} avoidable</div>`:''}
-        </div>
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px"><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;margin-bottom:6px">Total Spent</div><div style="font-size:20px;font-weight:800;color:#dc2626">${fmtMYR(spent)}</div><div style="font-size:10px;color:#94a3b8;margin-top:3px">${burnPct}% of discretionary</div><div style="background:#f1f5f9;border-radius:99px;height:5px;margin-top:8px;overflow:hidden"><div style="height:100%;width:${burnPct}%;background:${burnPct<40?"#059669":burnPct<70?"#d97706":"#dc2626"};border-radius:99px"></div></div></div>
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px"><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;margin-bottom:6px">Budget Remaining</div><div style="font-size:20px;font-weight:800;color:${left>=0?"#059669":"#dc2626"}">${fmtMYR(Math.abs(left))}</div><div style="font-size:10px;color:#94a3b8;margin-top:3px">${left>=0?"left this month":"OVER BUDGET"}</div></div>
       </div>
-
-      <!-- EXPENSE BREAKDOWN -->
-      ${catTotals.length > 0 ? `
-      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:16px;margin-bottom:20px">
-        <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;margin-bottom:12px">Expense Breakdown</div>
-        <div style="display:flex;gap:16px;align-items:flex-start">
-          <div>${pieSVG(catTotals, spent, 120)}<div style="font-size:9px;color:#94a3b8;text-align:center;margin-top:4px">Total: ${fmtMYR(spent)}</div></div>
-          <div style="flex:1">
-            ${catTotals.map((c,i) => {
-              const pct = spent > 0 ? Math.round((c.total/spent)*100) : 0;
-              return `<div style="margin-bottom:8px">
-                <div style="display:flex;justify-content:space-between;margin-bottom:3px">
-                  <span style="font-size:11px">${c.icon} ${c.label}</span>
-                  <span style="font-size:11px;font-weight:700">${fmtMYR(c.total)} <span style="color:#94a3b8;font-weight:400">(${pct}%)</span></span>
-                </div>
-                <div style="background:#f1f5f9;border-radius:99px;height:5px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${pieColors[i%pieColors.length]};border-radius:99px"></div></div>
-              </div>`;
-            }).join("")}
-          </div>
-        </div>
-      </div>` : `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:24px;margin-bottom:20px;text-align:center;color:#94a3b8">No expenses logged for ${MONTHS_FULL[m]}</div>`}
-
-      <!-- BILLS -->
-      <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#64748b;margin-bottom:10px;padding-left:8px;border-left:3px solid #4f46e5">Bills & Commitments</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
-        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px">
-          <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;margin-bottom:6px">Bills Cleared</div>
-          <div style="font-size:20px;font-weight:800;color:#4f46e5">${paidBills} / ${BILL_DEFS.length}</div>
-          <div style="background:#f1f5f9;border-radius:99px;height:5px;margin-top:8px;overflow:hidden"><div style="height:100%;width:${Math.round((paidBills/BILL_DEFS.length)*100)}%;background:#4f46e5;border-radius:99px"></div></div>
-        </div>
-        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px">
-          <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;margin-bottom:8px">Top Commitments</div>
-          ${fixedCom.filter(f=>f.amount>0).sort((a,b)=>b.amount-a.amount).slice(0,4).map(f=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f8faff"><span style="font-size:11px">${f.label}</span><strong style="font-size:11px">${fmtMYR(f.amount)}</strong></div>`).join('')}
-        </div>
-      </div>
-
-      <!-- NET WORTH -->
+      ${catTotals.length>0?`<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:16px;margin-bottom:20px"><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;margin-bottom:12px">Expense Breakdown</div><div style="display:flex;gap:16px;align-items:flex-start"><div>${pieSVG(catTotals,spent,120)}</div><div style="flex:1">${catTotals.map((c,i)=>{const pct=spent>0?Math.round((c.total/spent)*100):0;return`<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:11px">${c.icon} ${c.label}</span><span style="font-size:11px;font-weight:700">${fmtMYR(c.total)} (${pct}%)</span></div><div style="background:#f1f5f9;border-radius:99px;height:5px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${pieColors[i%pieColors.length]};border-radius:99px"></div></div></div>`;}).join("")}</div></div></div>`:``}
       <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#64748b;margin-bottom:10px;padding-left:8px;border-left:3px solid #4f46e5">Total Tracked Assets</div>
       <div style="background:linear-gradient(135deg,#1e1b4b,#312e81);color:#fff;border-radius:12px;padding:20px;margin-bottom:20px">
         <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;opacity:0.6;margin-bottom:6px">Total (excl. properties)</div>
-        <div style="font-size:28px;font-weight:800;letter-spacing:-1px">${fmtMYR(totalTracked)}</div>
-        <div style="font-size:10px;opacity:0.45;margin-top:4px">Properties excluded — fully leveraged, zero equity yet</div>
+        <div style="font-size:28px;font-weight:800">${fmtMYR(totalTracked)}</div>
         <div style="display:flex;justify-content:space-between;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.15)">
           <div><div style="font-size:9px;opacity:0.55;margin-bottom:3px">SGD Savings</div><div style="font-size:13px;font-weight:700">${fmtMYR(profile.sgdSavings||0)}</div></div>
           <div><div style="font-size:9px;opacity:0.55;margin-bottom:3px">Moomoo Portfolio</div><div style="font-size:13px;font-weight:700">${fmtMYR(profile.moomooPort||0)}</div></div>
           <div><div style="font-size:9px;opacity:0.55;margin-bottom:3px">Moomoo Cash</div><div style="font-size:13px;font-weight:700">${fmtMYR(profile.moomooCash||0)}</div></div>
         </div>
       </div>
-
-      <!-- INVESTMENT PROJECTION -->
       <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#64748b;margin-bottom:10px;padding-left:8px;border-left:3px solid #4f46e5">Investment Projection — ${yrs} Years</div>
       <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:16px;margin-bottom:24px">
-        <div style="font-size:10px;color:#94a3b8;margin-bottom:14px">Starting: ${fmtMYR(cp)} · Monthly: ${fmtMYR(vm)} · Horizon: ${yrs} years</div>
+        <div style="font-size:10px;color:#94a3b8;margin-bottom:14px">Starting: ${fmtMYR(cp)} · Monthly: ${fmtMYR(vm)} · ${yrs} years</div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-          <div style="text-align:center;background:#f8faff;border:1px solid #e2e8f0;border-radius:10px;padding:14px">
-            <div style="font-size:9px;color:#64748b;font-weight:700;margin-bottom:5px">CONSERVATIVE 8%</div>
-            <div style="font-size:18px;font-weight:800;color:#64748b">${fmtMYR(proj8,true)}</div>
-          </div>
-          <div style="text-align:center;background:#e0e7ff;border:1px solid #a5b4fc;border-radius:10px;padding:14px">
-            <div style="font-size:9px;color:#4f46e5;font-weight:700;margin-bottom:5px">BASE CASE 10%</div>
-            <div style="font-size:18px;font-weight:800;color:#4f46e5">${fmtMYR(proj10,true)}</div>
-          </div>
-          <div style="text-align:center;background:#d1fae5;border:1px solid #6ee7b7;border-radius:10px;padding:14px">
-            <div style="font-size:9px;color:#059669;font-weight:700;margin-bottom:5px">OPTIMISTIC 12%</div>
-            <div style="font-size:18px;font-weight:800;color:#059669">${fmtMYR(proj12,true)}</div>
-          </div>
+          <div style="text-align:center;background:#f8faff;border:1px solid #e2e8f0;border-radius:10px;padding:14px"><div style="font-size:9px;color:#64748b;font-weight:700;margin-bottom:5px">CONSERVATIVE 8%</div><div style="font-size:18px;font-weight:800;color:#64748b">${fmtMYR(proj8,true)}</div></div>
+          <div style="text-align:center;background:#e0e7ff;border:1px solid #a5b4fc;border-radius:10px;padding:14px"><div style="font-size:9px;color:#4f46e5;font-weight:700;margin-bottom:5px">BASE CASE 10%</div><div style="font-size:18px;font-weight:800;color:#4f46e5">${fmtMYR(proj10,true)}</div></div>
+          <div style="text-align:center;background:#d1fae5;border:1px solid #6ee7b7;border-radius:10px;padding:14px"><div style="font-size:9px;color:#059669;font-weight:700;margin-bottom:5px">OPTIMISTIC 12%</div><div style="font-size:18px;font-weight:800;color:#059669">${fmtMYR(proj12,true)}</div></div>
         </div>
       </div>
-
-      <!-- FOOTER -->
-      <div style="text-align:center;color:#94a3b8;font-size:9px;padding-top:14px;border-top:1px solid #e2e8f0">
-        DevFinance OS · ${MONTHS_FULL[m]} ${y} · SGD/MYR ${sgdRate.toFixed(4)} · ${now.toLocaleString('en-MY')}
-      </div>
+      <div style="text-align:center;color:#94a3b8;font-size:9px;padding-top:14px;border-top:1px solid #e2e8f0">DevFinance OS · ${MONTHS_FULL[m]} ${y} · SGD/MYR ${sgdRate.toFixed(4)} · ${now.toLocaleString('en-MY')}</div>
     </div>`;
-
-    setProgress(40, "Rendering report...");
-    await new Promise(r => setTimeout(r, 100));
-
-    setProgress(60, "Capturing to canvas...");
-    const canvas = await html2canvas(container, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: '#ffffff',
-      logging: false,
-    });
-
-    setProgress(80, "Building PDF...");
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
-
-    const pageW   = pdf.internal.pageSize.getWidth();
-    const pageH   = pdf.internal.pageSize.getHeight();
-    const imgW    = pageW;
-    const imgH    = (canvas.height * imgW) / canvas.width;
-    const imgData = canvas.toDataURL('image/jpeg', 0.95);
-
-    // Split across multiple pages if needed
-    let posY = 0;
-    while (posY < imgH) {
-      if (posY > 0) pdf.addPage();
-      pdf.addImage(imgData, 'JPEG', 0, -posY, imgW, imgH);
-      posY += pageH;
-    }
-
-    setProgress(95, "Saving PDF...");
-
-    const filename = `DevFinance_${MONTHS_FULL[m]}_${y}.pdf`;
-    pdf.save(filename);
-
-    setProgress(100, "Done!");
-    await new Promise(r => setTimeout(r, 800));
-
-  } catch(err) {
-    console.error("PDF error:", err);
-    status.textContent = "Error generating PDF. Try again.";
-    await new Promise(r => setTimeout(r, 2000));
-  } finally {
-    overlay.style.display = "none";
-    container.innerHTML = "";
-  }
+    setProgress(40,"Rendering...");await new Promise(r=>setTimeout(r,100));
+    setProgress(60,"Capturing...");
+    const canvas=await html2canvas(container,{scale:2,useCORS:true,allowTaint:true,backgroundColor:'#ffffff',logging:false});
+    setProgress(80,"Building PDF...");
+    const{jsPDF}=window.jspdf;const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    const pageW=pdf.internal.pageSize.getWidth(),pageH=pdf.internal.pageSize.getHeight(),imgW=pageW,imgH=(canvas.height*imgW)/canvas.width,imgData=canvas.toDataURL('image/jpeg',0.95);
+    let posY=0;while(posY<imgH){if(posY>0)pdf.addPage();pdf.addImage(imgData,'JPEG',0,-posY,imgW,imgH);posY+=pageH;}
+    setProgress(95,"Saving...");pdf.save(`DevFinance_${MONTHS_FULL[m]}_${y}.pdf`);
+    setProgress(100,"Done!");await new Promise(r=>setTimeout(r,800));
+  }catch(err){console.error("PDF error:",err);status.textContent="Error: "+err.message;await new Promise(r=>setTimeout(r,2000));}
+  finally{overlay.style.display="none";container.innerHTML="";}
 }
-
-// ══════════════════════════════════════════════════════════════════════
-// 16. INIT
-// ══════════════════════════════════════════════════════════════════════
-(function init() {
+(function init(){
   const now=new Date();
   ["exp-month-sel","an-month-sel"].forEach(id=>{
-    const el=document.getElementById(id); if(!el) return;
-    MONTHS_SHORT.forEach((m,i)=>{const o=document.createElement("option");o.value=i;o.textContent=m;if(i===now.getMonth()) o.selected=true;el.appendChild(o);});
+    const el=document.getElementById(id);if(!el)return;
+    MONTHS_SHORT.forEach((m,i)=>{const o=document.createElement("option");o.value=i;o.textContent=m;if(i===now.getMonth())o.selected=true;el.appendChild(o);});
   });
-  // Fill setup month selector
   const sms=document.getElementById("setup-startmonth");
-  if(sms) MONTHS_SHORT.forEach((m,i)=>{const o=document.createElement("option");o.value=i;o.textContent=m;if(i===profile.billsStartMonth) o.selected=true;sms.appendChild(o);});
-
-  // Load custom bills added by user
-  const _customBills = load("dev_custom_bills", []);
-  _customBills.forEach(b => { if (!BILL_DEFS.find(d => d.id === b.id)) BILL_DEFS.push(b); });
-  // Load auto overrides
-  const _autoOverrides = load("dev_bill_auto", {});
-  Object.entries(_autoOverrides).forEach(([id, val]) => {
-    const def = BILL_DEFS.find(d => d.id === id);
-    if (def) def.auto = val;
-  });
-  // Always sync bills and render regardless of setup state
-  syncBillAmounts();
-  if(!isSetupDone()) {
+  if(sms)MONTHS_SHORT.forEach((m,i)=>{const o=document.createElement("option");o.value=i;o.textContent=m;if(i===profile.billsStartMonth)o.selected=true;sms.appendChild(o);});
+  // Load custom bills
+  const _customBills=load("dev_custom_bills",[]);
+  _customBills.forEach(b=>{if(!BILL_DEFS.find(d=>d.id===b.id))BILL_DEFS.push(b);});
+  if(!isSetupDone()){
     showSetup();
-    renderBills(); // still render bills even if setup not done
-  } else {
+  }else{
     document.getElementById("setup-screen").style.display="none";
     document.getElementById("app-shell").style.display="block";
-    renderOverview();
-    renderCommitments();
-    renderBills();
-    fetchLiveRate();
+    syncBillAmounts();renderOverview();renderCommitments();fetchLiveRate();
   }
 })();
-
 </script>
 </body>
 </html>
